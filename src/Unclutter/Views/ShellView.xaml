@@ -1,0 +1,40 @@
+﻿<mah:MetroWindow x:Class="Unclutter.Views.ShellView"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                 Style="{DynamicResource Style.MetroWindow}"
+                 Title="{Binding Title}"
+                 Width="1000"
+                 Height="700"
+                 MinWidth="700"
+                 MinHeight="500"
+                 SizeToContent="Manual"
+                 WindowStartupLocation="CenterScreen">
+
+    <mah:MetroWindow.RightWindowCommands>
+        <mah:WindowCommands ShowLastSeparator="True"
+                            ShowSeparators="False">
+            <materialDesign:PackIcon Kind="WhiteBalanceSunny"
+                                     VerticalAlignment="Center"
+                                     Height="18"
+                                     Width="18"
+                                     ToolTip="Light theme" />
+            <ToggleButton Style="{DynamicResource MaterialDesignSwitchToggleButton}"
+                          Margin="4 0"
+                          ToolTip="Switch theme mode"
+                          IsChecked="True"
+                          Command="{Binding SwitchThemeModeCommand}"
+                          CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}" />
+            <materialDesign:PackIcon Kind="NightSky"
+                                     VerticalAlignment="Center"
+                                     Height="18"
+                                     Width="18"
+                                     ToolTip="Dark theme" />
+        </mah:WindowCommands>
+    </mah:MetroWindow.RightWindowCommands>
+
+    <Grid>
+
+    </Grid>
+</mah:MetroWindow>

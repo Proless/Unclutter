@@ -1,0 +1,15 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Unclutter.Theme;component/Base.xaml" />
+        <!--  Custom  -->
+        <ResourceDictionary Source="/Unclutter.Theme;component/Styles/Window.xaml" />
+        <ResourceDictionary Source="/Unclutter.Theme;component/Styles/Button.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!--  Defaults  -->
+    <Style BasedOn="{StaticResource Style.MetroWindow}"
+           TargetType="{x:Type mah:MetroWindow}" />
+
+</ResourceDictionary>

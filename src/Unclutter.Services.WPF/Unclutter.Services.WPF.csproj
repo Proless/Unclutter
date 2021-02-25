@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Ookii.Dialogs.Wpf" Version="3.1.0" />
+		<PackageReference Include="VirtualizingWrapPanel" Version="1.5.3" />
+		<PackageReference Include="System.Drawing.Common" Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Unclutter.Prism\Unclutter.Prism.csproj" />
+	  <ProjectReference Include="..\Unclutter.SDK\Unclutter.SDK.csproj" />
+	  <ProjectReference Include="..\Unclutter.Services\Unclutter.Services.csproj" />
+	  <ProjectReference Include="..\Unclutter.Theme\Unclutter.Theme.csproj" />
+	</ItemGroup>
+
+</Project>
