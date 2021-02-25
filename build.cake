@@ -1,10 +1,10 @@
-var target = Argument("target", "Test");
+var target = Argument("target", "Build");
 var configuration = Argument("configuration", "Release");
 var solutionFolder ="./src";
 
 Task("Clean");
 
-Task("Restore-NuGet-Packages")
+Task("Restore")
     .Does(()=> {
         DotNetCoreRestore(solutionFolder);
     });
@@ -12,7 +12,7 @@ Task("Restore-NuGet-Packages")
 
 Task("Build")
 .IsDependentOn("Clean")
-    .IsDependentOn("Restore-NuGet-Packages")
+    .IsDependentOn("Restore")
     .Does(()=> {
         DotNetCoreBuild(solutionFolder, new DotNetCoreBuildSettings{
             NoRestore = true,
