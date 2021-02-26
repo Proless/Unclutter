@@ -6,8 +6,6 @@
         public class Dialogs
         {
             public const string Startup = "Dialogs.Startup";
-            public const string Message = "Dialogs.Startup";
-            public const string Progress = "Dialogs.Startup";
         }
 
         public class Views
@@ -34,7 +32,6 @@
             public const string Game = "Parameters.Game";
             public const string Profile = "Parameters.Profile";
             public const string APIKey = "Parameters.APIKey";
-            public const string Dialog = "Parameters.Dialog";
         }
     }
 
