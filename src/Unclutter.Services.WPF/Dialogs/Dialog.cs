@@ -1,11 +1,12 @@
-﻿namespace Unclutter.Services.WPF.Dialogs
+﻿using System.Windows;
+
+namespace Unclutter.Services.WPF.Dialogs
 {
-    internal class Dialog : BaseDialog
+    public class Dialog : BaseDialog
     {
         /* Fields */
         private string _leftButtonLabel;
         private string _rightButtonLabel;
-        private string _optionLabel;
         private string _midButtonLabel;
 
         /* Properties */
@@ -24,14 +25,9 @@
             get => _rightButtonLabel;
             set => SetProperty(ref _rightButtonLabel, value);
         }
-        public string OptionLabel
-        {
-            get => _optionLabel;
-            set => SetProperty(ref _optionLabel, value);
-        }
 
         /* Constructor */
-        public Dialog()
+        public Dialog(Window dlgWindow) : base(dlgWindow)
         {
             LeftButtonLabel = null;
             RightButtonLabel = null;

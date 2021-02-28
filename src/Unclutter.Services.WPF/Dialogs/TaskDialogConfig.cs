@@ -4,13 +4,10 @@ using Unclutter.SDK.Dialogs;
 
 namespace Unclutter.Services.WPF.Dialogs
 {
-    internal class TaskDialogConfig : BaseDialogConfig, ITaskDialogConfig
+    public class TaskDialogConfig : ITaskDialogConfig
     {
         /* Fields */
         private readonly TaskDialog _task;
-
-        /* Event */
-        public override event Action<BaseDialog> Created;
 
         /* Constructor */
         public TaskDialogConfig(TaskDialog task)
@@ -19,11 +16,9 @@ namespace Unclutter.Services.WPF.Dialogs
         }
 
         /* Methods */
-        public ITaskDialog Build()
+        public ITaskDialog Create()
         {
-            var newDlg = Create();
-            Created?.Invoke(newDlg);
-            return newDlg;
+            return _task;
         }
         public ITaskDialogConfig Option(string label, bool isChecked = false)
         {
@@ -52,27 +47,6 @@ namespace Unclutter.Services.WPF.Dialogs
         {
             _task.CanClose = defaultValue;
             return this;
-        }
-
-        /* Helpers */
-        private TaskDialog Create()
-        {
-            return new TaskDialog
-            {
-                Text = _task.Text,
-                Title = _task.Title,
-                Type = _task.Type,
-                IsOptionChecked = _task.IsOptionChecked,
-                CanClose = _task.CanClose,
-                CancelButtonLabel = _task.CancelButtonLabel,
-                Icon = _task.Icon,
-                OnClicked = _task.OnClicked,
-                CancellationTokenSource = _task.CancellationTokenSource,
-                IsCancelable = _task.IsCancelable,
-                IsIndeterminate = _task.IsIndeterminate,
-                OptionLabel = _task.OptionLabel,
-                ProgressValue = _task.ProgressValue
-            };
         }
     }
 }

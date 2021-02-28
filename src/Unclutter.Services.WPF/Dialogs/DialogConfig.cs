@@ -3,13 +3,10 @@ using Unclutter.SDK.Dialogs;
 
 namespace Unclutter.Services.WPF.Dialogs
 {
-    internal class DialogConfig : BaseDialogConfig, IDialogConfig
+    public class DialogConfig : IDialogConfig
     {
         /* Fields */
         private readonly Dialog _dialog;
-
-        /* Event */
-        public override event Action<BaseDialog> Created;
 
         /* Constructor */
         public DialogConfig(Dialog dialog)
@@ -18,11 +15,9 @@ namespace Unclutter.Services.WPF.Dialogs
         }
 
         /* Methods */
-        public IDialog Build()
+        public IDialog Create()
         {
-            var newDlg = Create();
-            Created?.Invoke(newDlg);
-            return newDlg;
+            return _dialog;
         }
         public IDialogConfig OnClicked(Action<IDialog, DialogAction> onClicked)
         {
@@ -54,25 +49,6 @@ namespace Unclutter.Services.WPF.Dialogs
         {
             _dialog.CanClose = defaultValue;
             return this;
-        }
-
-        /* Helpers */
-        private Dialog Create()
-        {
-            return new Dialog
-            {
-                Text = _dialog.Text,
-                Title = _dialog.Title,
-                Type = _dialog.Type,
-                IsOptionChecked = _dialog.IsOptionChecked,
-                CanClose = _dialog.CanClose,
-                OnClicked = _dialog.OnClicked,
-                OptionLabel = _dialog.OptionLabel,
-                Icon = _dialog.Icon,
-                LeftButtonLabel = _dialog.LeftButtonLabel,
-                MidButtonLabel = _dialog.MidButtonLabel,
-                RightButtonLabel = _dialog.RightButtonLabel
-            };
         }
     }
 }

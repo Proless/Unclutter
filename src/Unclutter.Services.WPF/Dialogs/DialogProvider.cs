@@ -1,4 +1,8 @@
-﻿using Prism.Services.Dialogs;
+﻿using System.Linq;
+using System.Reflection;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Unclutter.SDK.Dialogs;
 using Unclutter.SDK.IServices;
 
@@ -6,19 +10,6 @@ namespace Unclutter.Services.WPF.Dialogs
 {
     public class DialogProvider : IDialogProvider
     {
-        /* Fields */
-        private readonly IDialogService _dialogService;
-
-        /* Properties */
-        public string MessageDialogId { get; set; }
-        public string TaskDialogId { get; set; }
-
-        /* Constructor */
-        public DialogProvider(IDialogService dialogService)
-        {
-            _dialogService = dialogService;
-        }
-
         /* Methods */
         public IDialogConfig Information(string title, string message)
         {
@@ -38,7 +29,7 @@ namespace Unclutter.Services.WPF.Dialogs
         }
         public ITaskDialogConfig Task(string title, string message)
         {
-            var newTaskDialog = new TaskDialog
+            var newTaskDialog = new TaskDialog(new TaskDialogWindow())
             {
                 Type = DialogType.Task,
                 Title = title,
@@ -48,7 +39,6 @@ namespace Unclutter.Services.WPF.Dialogs
             SetIcon(newTaskDialog);
 
             var newTaskDialogConfig = new TaskDialogConfig(newTaskDialog);
-            newTaskDialogConfig.Created += OnDialogCreated;   // TODO: unsubscribe when no longer needed !, memory leak potential ?
 
             return newTaskDialogConfig;
         }
@@ -56,7 +46,7 @@ namespace Unclutter.Services.WPF.Dialogs
         /* Helpers */
         private IDialogConfig InternalCreateDialogConfig(DialogType type, string title, string message)
         {
-            var newDialog = new Dialog
+            var newDialog = new Dialog(new MessageDialogWindow())
             {
                 Type = type,
                 Title = title,
@@ -66,20 +56,45 @@ namespace Unclutter.Services.WPF.Dialogs
             SetIcon(newDialog);
 
             var newDialogConfig = new DialogConfig(newDialog);
-            newDialogConfig.Created += OnDialogCreated; // TODO: unsubscribe when no longer needed !, memory leak potential ?
 
             return newDialogConfig;
         }
-        private void OnDialogCreated(BaseDialog dialog)
+        private void SetIcon(BaseDialog dialog)
         {
-            dialog.RequestOpen += OnRequestOpen;
-        }
-        private void OnRequestOpen(BaseDialog dialog, OpenMode mode)
-        {
+            var img = new Image
+            {
+                Source = GetImageSource(dialog.Type)
+            };
 
+            dialog.Icon = img;
         }
-        private void SetIcon(BaseDialog baseDialog)
+        private ImageSource GetImageSource(DialogType dialogType)
         {
+            var dlgIconId = dialogType switch
+            {
+                DialogType.Information => "information.png",
+                DialogType.Question => "question.png",
+                DialogType.Warning => "warning.png",
+                DialogType.Error => "error.png",
+                DialogType.Task => "task.png",
+                _ => "information.png"
+            };
+
+            var resourceName = Assembly.GetExecutingAssembly()
+                .GetManifestResourceNames()
+                .First(r => r.EndsWith(dlgIconId));
+
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
+
+            var source = new BitmapImage();
+            source.BeginInit();
+            source.DecodePixelHeight = 48;
+            source.DecodePixelWidth = 48;
+            source.StreamSource = stream;
+            source.EndInit();
+            source.Freeze();
+
+            return source;
         }
     }
 }

@@ -1,17 +1,17 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using Unclutter.SDK.Dialogs;
 
 namespace Unclutter.Services.WPF.Dialogs
 {
-    internal class TaskDialog : BaseDialog, ITaskDialog
+    public class TaskDialog : BaseDialog, ITaskDialog
     {
         /* Fields */
         private bool _isCancelable;
         private bool _isIndeterminate;
         private double _progressValue;
         private string _cancelButtonLabel;
-        private string _optionLabel;
 
         /* Properties */
         public bool IsCancelable
@@ -34,18 +34,20 @@ namespace Unclutter.Services.WPF.Dialogs
             get => _cancelButtonLabel;
             set => SetProperty(ref _cancelButtonLabel, value);
         }
-        public string OptionLabel
-        {
-            get => _optionLabel;
-            set => SetProperty(ref _optionLabel, value);
-        }
 
         /* Constructor */
-        public TaskDialog()
+        public TaskDialog(Window dlgWindow) : base(dlgWindow)
         {
             IsCancelable = false;
             IsIndeterminate = true;
             ProgressValue = 0d;
+        }
+
+        /* Methods */
+        protected override void OnActionClicked(DialogAction? dialogAction)
+        {
+            CancellationTokenSource?.Cancel();
+            base.OnActionClicked(dialogAction);
         }
 
         #region IProgressController

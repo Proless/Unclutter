@@ -6,9 +6,9 @@ namespace Unclutter.SDK.Dialogs
     public interface IDialogConfig
     {
         /// <summary>
-        /// Build the dialog.
+        /// Create the dialog.
         /// </summary>
-        IDialog Build();
+        IDialog Create();
 
         /// <summary>
         /// Register a click handler action, which is invoked if a button on the dialog is clicked. <br/>
@@ -22,7 +22,6 @@ namespace Unclutter.SDK.Dialogs
         /// </summary>
         /// <param name="label">The check-box label</param>
         /// <param name="isChecked">The check-box checked status, default is false</param>
-        /// <returns></returns>
         IDialogConfig Option(string label, bool isChecked = false);
 
         /// <summary>
@@ -52,16 +51,15 @@ namespace Unclutter.SDK.Dialogs
     public interface ITaskDialogConfig
     {
         /// <summary>
-        /// Build the dialog
+        /// Create the dialog.
         /// </summary>
-        ITaskDialog Build();
+        ITaskDialog Create();
 
         /// <summary>
         /// Display an optional check-box on the dialog
         /// </summary>
         /// <param name="label">The check-box label</param>
         /// <param name="isChecked">The check-box checked status, default is false</param>
-        /// <returns></returns>
         ITaskDialogConfig Option(string label, bool isChecked = false);
 
         /// <summary>

@@ -1,21 +1,22 @@
-﻿using Prism.Mvvm;
+﻿using Prism.Commands;
+using Prism.Mvvm;
 using System;
+using System.ComponentModel;
+using System.Windows;
 using Unclutter.SDK.Dialogs;
 
 namespace Unclutter.Services.WPF.Dialogs
 {
-    internal abstract class BaseDialog : BindableBase, IDialog
+    public abstract class BaseDialog : BindableBase, IDialog
     {
         /* Fields */
+        private readonly Window _dlgWindow;
         private string _title;
         private string _text;
         private bool _canClose;
         private bool _isOptionChecked;
         private object _icon;
-
-        /* Event */
-        public event Action<BaseDialog> RequestClose;
-        public event Action<BaseDialog, OpenMode> RequestOpen;
+        private string _optionLabel;
 
         /* Properties */
         public string Title
@@ -33,14 +34,59 @@ namespace Unclutter.Services.WPF.Dialogs
             get => _icon;
             set => SetProperty(ref _icon, value);
         }
+        public string OptionLabel
+        {
+            get => _optionLabel;
+            set => SetProperty(ref _optionLabel, value);
+        }
+
+        /* Commands */
+        public DelegateCommand<DialogAction?> ActionClickedCommand => new(OnActionClicked);
 
         /* Constructor */
-        internal BaseDialog()
+        internal BaseDialog(Window dlgWindow)
         {
+            _dlgWindow = dlgWindow ?? throw new ArgumentNullException(nameof(dlgWindow));
+            _dlgWindow.DataContext = this;
+            _dlgWindow.Closing += OnClosing;
             Title = null;
             Text = null;
             CanClose = true;
             IsOptionChecked = false;
+        }
+
+        /* Methods */
+        public void Show()
+        {
+            Application.Current.Dispatcher.Invoke(() => _dlgWindow.Show());
+        }
+        public void ShowDialog()
+        {
+            Application.Current.Dispatcher.Invoke(() => _dlgWindow.ShowDialog());
+        }
+        public void Close()
+        {
+            Application.Current.Dispatcher.Invoke(() => _dlgWindow.Close());
+        }
+
+        /* Helpers */
+        protected virtual void OnActionClicked(DialogAction? dialogAction)
+        {
+            if (dialogAction is null) return;
+            OnClicked?.Invoke(this, (DialogAction)dialogAction);
+
+            if (CanClose)
+            {
+                Close();
+            }
+        }
+        private void OnClosing(object sender, CancelEventArgs e)
+        {
+            OnClicked?.Invoke(this, DialogAction.Close);
+            if (!CanClose)
+            {
+                e.Cancel = true;
+            }
         }
 
         #region IDialog
@@ -56,18 +102,6 @@ namespace Unclutter.Services.WPF.Dialogs
         }
         public Action<IDialog, DialogAction> OnClicked { get; set; }
         public DialogType Type { get; set; }
-        public void Show()
-        {
-            RequestOpen?.Invoke(this, OpenMode.NonModal);
-        }
-        public void ShowDialog()
-        {
-            RequestOpen?.Invoke(this, OpenMode.Modal);
-        }
-        public void Close()
-        {
-            RequestClose?.Invoke(this);
-        }
         #endregion
     }
 }

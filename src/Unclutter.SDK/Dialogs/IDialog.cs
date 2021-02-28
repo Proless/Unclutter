@@ -26,17 +26,17 @@ namespace Unclutter.SDK.Dialogs
         DialogType Type { get; }
 
         /// <summary>
-        /// Show a non-modal dialog
+        /// Open a non modal dialog
         /// </summary>
         void Show();
 
         /// <summary>
-        /// Show a modal dialog.
+        /// Open a modal dialog
         /// </summary>
         void ShowDialog();
 
         /// <summary>
-        /// Close the dialog regardless of the <see cref="CanClose"/> value, note that this doesn't invoke the <see cref="OnClicked"/> action
+        /// Closes the dialog regardless of the <see cref="CanClose"/> property value
         /// </summary>
         void Close();
     }
