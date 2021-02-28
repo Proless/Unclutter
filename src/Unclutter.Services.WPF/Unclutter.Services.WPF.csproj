@@ -6,6 +6,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\error.png" />
+	  <None Remove="Resources\information.png" />
+	  <None Remove="Resources\question.png" />
+	  <None Remove="Resources\task.png" />
+	  <None Remove="Resources\warning.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Ookii.Dialogs.Wpf" Version="3.1.0" />
 		<PackageReference Include="VirtualizingWrapPanel" Version="1.5.3" />
 		<PackageReference Include="System.Drawing.Common" Version="5.0.0" />
@@ -16,6 +24,14 @@
 	  <ProjectReference Include="..\Unclutter.SDK\Unclutter.SDK.csproj" />
 	  <ProjectReference Include="..\Unclutter.Services\Unclutter.Services.csproj" />
 	  <ProjectReference Include="..\Unclutter.Theme\Unclutter.Theme.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Resources\error.png" />
+	  <EmbeddedResource Include="Resources\information.png" />
+	  <EmbeddedResource Include="Resources\question.png" />
+	  <EmbeddedResource Include="Resources\task.png" />
+	  <EmbeddedResource Include="Resources\warning.png" />
 	</ItemGroup>
 
 </Project>
