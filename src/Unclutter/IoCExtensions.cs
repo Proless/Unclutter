@@ -11,10 +11,10 @@ using Unclutter.Services.ModelMapper;
 using Unclutter.Services.Plugins;
 using Unclutter.Services.Profiles;
 using Unclutter.Services.WPF;
+using Unclutter.Services.WPF.Dialogs;
 using Unclutter.Services.WPF.Images;
 using Unclutter.Services.WPF.Notifications;
 using Unclutter.Theme;
-using Unclutter.Views.Dialogs;
 using Unclutter.Views.Startup;
 
 namespace Unclutter
@@ -37,6 +37,7 @@ namespace Unclutter
             containerRegistry.Register<IImageProvider, ImageProvider>();
             containerRegistry.Register<IDirectoryService, DirectoryService>();
             containerRegistry.Register<IThemeProvider, ThemeProvider>();
+            containerRegistry.Register<IDialogProvider, DialogProvider>();
         }
 
         public static void RegisterSingletonServices(this IContainerRegistry containerRegistry)
@@ -62,7 +63,6 @@ namespace Unclutter
         {
             // Dialogs
             containerRegistry.RegisterDialog<StartupView>(LocalIdentifiers.Dialogs.Startup);
-            containerRegistry.RegisterDialog<MessageView>(LocalIdentifiers.Dialogs.Message);
 
             //// Views
             //containerRegistry.RegisterForNavigation<StartupView>(LocalIdentifiers.Views.Startup);

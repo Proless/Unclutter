@@ -26,21 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="ViewModels\Dialogs\" />
     <Folder Include="ViewModels\Profiles\" />
+    <Folder Include="Views\Dialogs\" />
     <Folder Include="Views\Profiles\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Views\Dialogs\MessageView.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Views\Dialogs\MessageView.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
 
 </Project>
