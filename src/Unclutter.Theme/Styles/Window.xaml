@@ -39,6 +39,8 @@
                 Value="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" />
         <Setter Property="ShowIconOnTitleBar"
                 Value="True" />
+        <Setter Property="Title"
+                Value="{Binding Title}" />
         <Setter Property="IconTemplate">
             <Setter.Value>
                 <DataTemplate>
@@ -58,13 +60,15 @@
         </Setter>
     </Style>
 
-    <Style x:Key="Styles.MetroWindow.Dialog"
+    <Style x:Key="Style.MetroWindow.Dialog"
            TargetType="{x:Type mah:MetroWindow}"
            BasedOn="{StaticResource Style.MetroWindow}">
+        <Setter Property="SizeToContent"
+                Value="Height" />
         <Setter Property="ResizeMode"
                 Value="NoResize" />
-        <Setter Property="Title"
-                Value="{Binding Title}" />
+        <Setter Property="Width"
+                Value="350" />
     </Style>
 
 </ResourceDictionary>

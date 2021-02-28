@@ -5,7 +5,7 @@
         public class Dialogs
         {
             public const string Message = "Dialogs.Message";
-            public const string Progress = "Dialogs.Progress";
+            public const string Task = "Dialogs.Task";
         }
 
         public class Parameters
