@@ -1,6 +1,5 @@
 ﻿using System;
 using Unclutter.SDK.Common;
-using Unclutter.SDK.IServices;
 
 namespace Unclutter.Services.Logging
 {
@@ -9,13 +8,18 @@ namespace Unclutter.Services.Logging
         /* Fields */
         private readonly Serilog.ILogger _logger;
 
+        /* Properties */
+        public string Location { get; }
+
         /* Constructors */
-        public Logger(Serilog.ILogger logger)
+        public Logger(Serilog.ILogger logger, string location)
         {
             _logger = logger;
+            Location = location;
         }
 
         /* Methods */
+
         public void Info(string messageTemplate, params object[] propertyValues) =>
             _logger.Information(messageTemplate, propertyValues);
         public void Error(Exception exception, string messageTemplate, params object[] propertyValues) =>

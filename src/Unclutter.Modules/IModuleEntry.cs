@@ -2,10 +2,10 @@
 
 namespace Unclutter.Modules
 {
-    public interface IModuleEntry : IModuleMetadata
+    public interface IModuleEntry
     {
         string ModuleLocation { get; set; }
-        IEnumerable<IModuleView> SettingViews { get; }
+        IModuleMetadata Metadata { get; }
         IEnumerable<IModuleView> Views { get; }
     }
 }

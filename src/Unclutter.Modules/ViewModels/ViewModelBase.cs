@@ -1,9 +1,9 @@
-﻿using System;
-using Prism.Commands;
-using Prism.Events;
+﻿using Prism.Commands;
 using Prism.Ioc;
 using Prism.Mvvm;
 using Prism.Regions;
+using System;
+using IEventAggregator = Prism.Events.IEventAggregator;
 
 namespace Unclutter.Modules.ViewModels
 {
@@ -14,7 +14,7 @@ namespace Unclutter.Modules.ViewModels
         private bool _keepAlive;
 
         /* Properties */
-        public string Title
+        public virtual string Title
         {
             get => _title;
             set => SetProperty(ref _title, value);
@@ -37,8 +37,8 @@ namespace Unclutter.Modules.ViewModels
         {
             RegionManager = ContainerLocator.Container.Resolve<IRegionManager>();
             EventAggregator = ContainerLocator.Container.Resolve<IEventAggregator>();
-            Title = string.Empty;
-            KeepAlive = true;
+            _title = string.Empty;
+            _keepAlive = true;
         }
 
         /* Methods */
@@ -47,5 +47,6 @@ namespace Unclutter.Modules.ViewModels
         public virtual bool IsNavigationTarget(NavigationContext navigationContext) => true;
         public virtual void OnNavigatedFrom(NavigationContext navigationContext) { }
         public virtual void ConfirmNavigationRequest(NavigationContext navigationContext, Action<bool> continuationCallback) => continuationCallback(true);
+        public virtual void OnViewLoaded() { }
     }
 }

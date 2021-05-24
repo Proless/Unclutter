@@ -5,9 +5,8 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Unclutter.NexusAPI;
-using Unclutter.NexusAPI.Exceptions;
-using Unclutter.NexusAPI.Inquirers;
+using Unclutter.API;
+using Unclutter.API.Factory;
 using Unclutter.SDK.Common;
 using Unclutter.SDK.IModels;
 using Unclutter.SDK.IServices;
@@ -19,15 +18,15 @@ namespace Unclutter.Services.Authentication
     public class AuthenticationService : IAuthenticationService
     {
         public const string NexusModsSSOServer = "wss://sso.nexusmods.com";
-        private readonly IJSONService _jSONService;
-        private readonly INexusAPIClientFactory _clientFactory;
+        private readonly IJsonService _jSONService;
+        private readonly INexusClientFactory _clientFactory;
         private readonly ILogger _log;
 
-        public AuthenticationService(IJSONService jSONService, ILoggerProvider loggerProvider, INexusAPIClientFactory clientFactory)
+        public AuthenticationService(IJsonService jSONService, ILoggerProvider loggerProvider, INexusClientFactory clientFactory)
         {
             _jSONService = jSONService;
             _clientFactory = clientFactory;
-            _log = loggerProvider.GetAppLogger();
+            _log = loggerProvider.GetInstance();
         }
         public async Task<IUserDetails> RequestAPIKey(string applicationReference, CancellationToken cancellationToken)
         {
@@ -56,7 +55,7 @@ namespace Unclutter.Services.Authentication
             // Store the connection_token.
             responseData = _jSONService.Deserialize(Encoding.UTF8.GetString(responseBuffer), responseData);
 
-            if (!responseData.success) throw new APIException(responseData.error, HttpStatusCode.ServiceUnavailable);
+            if (!responseData.success) throw new APIException(HttpStatusCode.ServiceUnavailable, responseData.error);
 
             // Open the browser to prompt the user to authorize the request via the nexus mods website (SSO Service).
             OpenBrowser(@"https://www.nexusmods.com/sso?id=" + uuid + "&application=" + applicationReference);
@@ -68,14 +67,12 @@ namespace Unclutter.Services.Authentication
             // Store the API Key.
             responseData = _jSONService.Deserialize(Encoding.UTF8.GetString(responseBuffer), responseData);
 
-            if (!responseData.success) throw new APIException(responseData.error, HttpStatusCode.ServiceUnavailable);
+            if (!responseData.success) throw new APIException(HttpStatusCode.ServiceUnavailable, responseData.error);
 
             // Checking to make sure the API Key was received, otherwise throw an exception.
             if (string.IsNullOrWhiteSpace(responseData.data.api_key))
             {
-                throw new APIException(
-                    $"Unable to receive the API Key,{Environment.NewLine}",
-                    HttpStatusCode.ServiceUnavailable);
+                throw new APIException(HttpStatusCode.ServiceUnavailable, $"Unable to receive the API Key,{Environment.NewLine}");
             }
 
             var userDetails = await ValidateAPIKey(responseData.data.api_key, cancellationToken);
@@ -83,9 +80,8 @@ namespace Unclutter.Services.Authentication
         }
         public async Task<IUserDetails> ValidateAPIKey(string key, CancellationToken cancellationToken)
         {
-            using var client = _clientFactory.CreateClient(key);
-            var inquirer = new UserInquirer(client);
-            var user = await inquirer.GetUserAsync(cancellationToken);
+            var client = _clientFactory.Create();
+            var user = await client.User.GetUserAsync(key, cancellationToken);
             return new UserDetails
             {
                 Email = user.Email,
@@ -93,7 +89,7 @@ namespace Unclutter.Services.Authentication
                 Name = user.Name,
                 IsPremium = user.IsPremium,
                 IsSupporter = user.IsSupporter,
-                ProfileUrl = user.ProfileAvatarUrl,
+                ProfileUri = user.ProfileAvatarUri,
                 Id = user.UserId
             };
         }

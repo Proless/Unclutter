@@ -1,35 +1,57 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="logo.png" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Unclutter.csproj.DotSettings" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Unclutter.Modules\Unclutter.Modules.csproj" />
-    <ProjectReference Include="..\Unclutter.NexusAPI\Unclutter.NexusAPI.csproj" />
-    <ProjectReference Include="..\Unclutter.Prism\Unclutter.Prism.csproj" />
-    <ProjectReference Include="..\Unclutter.SDK\Unclutter.SDK.csproj" />
-    <ProjectReference Include="..\Unclutter.Services.WPF\Unclutter.Services.WPF.csproj" />
-    <ProjectReference Include="..\Unclutter.Services\Unclutter.Services.csproj" />
-    <ProjectReference Include="..\Unclutter.Theme\Unclutter.Theme.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Unclutter.Modules\Unclutter.Modules.csproj" />
+		<ProjectReference Include="..\Unclutter.SDK\Unclutter.SDK.csproj" />
+		<ProjectReference Include="..\Unclutter.Services\Unclutter.Services.csproj" />
+		<ProjectReference Include="..\Unclutter.Theme\Unclutter.Theme.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <SplashScreen Include="logo.png" />
-  </ItemGroup>
+	<ItemGroup>
+		<Resource Include="Resources\icon.ico" />
+		<Resource Include="Resources\loaderScreenBg.jpg" />
+		<Resource Include="Resources\loaderScreenBgRotated.jpg" />
+		<Resource Include="Resources\logo.png" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ViewModels\Dialogs\" />
-    <Folder Include="ViewModels\Profiles\" />
-    <Folder Include="Views\Dialogs\" />
-    <Folder Include="Views\Profiles\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Initialization\LoaderScreen.xaml.cs">
+			<SubType>Code</SubType>
+		</Compile>
+		<Compile Update="Properties\Strings.Designer.cs">
+		  <DesignTime>True</DesignTime>
+		  <AutoGen>True</AutoGen>
+		  <DependentUpon>Strings.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Page Update="Initialization\LoaderScreen.xaml">
+			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+			<SubType>Designer</SubType>
+		</Page>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Initialization\ArgumentsHandlers\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Properties\Strings.resx">
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	</ItemGroup>
 
 </Project>

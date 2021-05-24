@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Prism.Commands;
+using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Prism.Commands;
+using System.Windows;
 
 namespace Unclutter.Modules.Commands
 {
@@ -48,7 +49,7 @@ namespace Unclutter.Modules.Commands
             try
             {
                 Executing = true;
-                await ExecuteAsync();
+                await Application.Current.Dispatcher.InvokeAsync(() => ExecuteAsync()).Task.Unwrap();
             }
             catch (Exception ex)
             {

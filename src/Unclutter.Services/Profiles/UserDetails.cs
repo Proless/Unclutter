@@ -1,5 +1,5 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using Unclutter.SDK.IModels;
 
 namespace Unclutter.Services.Profiles
@@ -10,7 +10,7 @@ namespace Unclutter.Services.Profiles
         public string Key { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
-        public Uri ProfileUrl { get; set; }
+        public Uri ProfileUri { get; set; }
         public bool IsSupporter { get; set; }
         public bool IsPremium { get; set; }
         [JsonIgnore]

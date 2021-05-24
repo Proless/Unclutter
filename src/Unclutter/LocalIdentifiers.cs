@@ -2,7 +2,6 @@
 {
     public class LocalIdentifiers
     {
-
         public class Dialogs
         {
             public const string Startup = "Dialogs.Startup";
@@ -11,28 +10,24 @@
         public class Views
         {
             public const string Startup = "Views.Startup";
-            public const string GameSelection = "Views.GameSelection";
-            public const string ProfileCreation = "Views.ProfileCreation";
             public const string Profiles = "Views.Profiles";
-            public const string NotificationCenter = "Views.NotificationCenter";
-            public const string Settings = "Views.Settings";
+            public const string ProfilesCreation = "Views.ProfilesCreation";
+            public const string GamesSelection = "Views.GamesSelection";
+            public const string Authentication = "Views.Authentication";
+            public const string StartupActions = "Views.StartupActions";
         }
 
         public class Regions
         {
-            public const string Startup = "Regions.Startup";
             public const string Shell = "Regions.Shell";
-            public const string Settings = "Regions.Settings";
-            public const string Profiles = "Regions.Profiles";
-            public const string NotificationCenter = "Regions.NotificationCenter";
+            public const string ProfilesManagement = "Regions.ProfilesManagement";
+            public const string StartupActions = "Regions.StartupActions";
+            public const string Games = "Regions.Games";
+            public const string Authentication = "Regions.Authentication";
         }
 
         public class Parameters
         {
-            public const string Game = "Parameters.Game";
-            public const string Profile = "Parameters.Profile";
-            public const string APIKey = "Parameters.APIKey";
         }
     }
-
 }

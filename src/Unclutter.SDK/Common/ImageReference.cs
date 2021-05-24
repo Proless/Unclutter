@@ -1,6 +1,4 @@
-﻿#nullable enable
-using System;
-using System.ComponentModel;
+﻿using System;
 using System.Reflection;
 
 namespace Unclutter.SDK.Common
@@ -8,7 +6,7 @@ namespace Unclutter.SDK.Common
     /// <summary>
     /// Image reference
     /// </summary>
-    [TypeConverter(typeof(ImageReferenceConverter))]
+
     public readonly struct ImageReference
     {
         /// <summary>
@@ -19,27 +17,27 @@ namespace Unclutter.SDK.Common
         /// <summary>
         /// true if it's the default instance
         /// </summary>
-        public bool IsDefault => Assembly is null && Name is null;
+        public bool IsDefault => Assembly is null && Path is null;
 
         /// <summary>
-        /// Assembly of image or null if <see cref="Name"/> is a URI
+        /// Assembly of image or null if <see cref="Path"/> is a URI
         /// </summary>
-        public Assembly? Assembly { get; }
+        public Assembly Assembly { get; }
 
         /// <summary>
-        /// Name of image
+        /// Path of image
         /// </summary>
-        public string Name { get; }
+        public string Path { get; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="assembly">Assembly of image or null if <paramref name="name"/> is a pack: URI</param>
-        /// <param name="name">Name of image</param>
-        public ImageReference(Assembly? assembly, string name)
+        /// <param name="name">Path of image</param>
+        public ImageReference(Assembly assembly, string name)
         {
             Assembly = assembly;
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Path = name ?? throw new ArgumentNullException(nameof(name));
         }
 
         /// <summary>
@@ -48,16 +46,13 @@ namespace Unclutter.SDK.Common
         /// <param name="value">String to parse</param>
         /// <param name="result">Result</param>
         /// <returns></returns>
-        public static bool TryParse(string? value, out ImageReference result)
+        public static bool TryParse(string value, out ImageReference result)
         {
             result = default;
-            switch (value)
-            {
-                case null:
-                    return false;
-                case "":
-                    return true;
-            }
+            if (value is null)
+                return false;
+            if (value == string.Empty)
+                return true;
 
             if (value.StartsWith("/", StringComparison.OrdinalIgnoreCase) ||
                 value.StartsWith("pack:", StringComparison.OrdinalIgnoreCase) ||
@@ -88,17 +83,15 @@ namespace Unclutter.SDK.Common
             return true;
         }
 
-        /// <summary>
-        /// Converts this instance to a string that can be passed to <see cref="TryParse(string, out ImageReference)"/>
-        /// </summary>
-        /// <returns></returns>
         public override string ToString()
         {
             if (IsDefault)
                 return string.Empty;
             if (Assembly is null)
-                return Name;
-            return Assembly.GetName().Name + "," + Name;
+                return Path;
+            return Assembly.GetName().Name + "," + Path;
         }
     }
 }
+
+

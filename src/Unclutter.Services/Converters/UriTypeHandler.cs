@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Data;
-using static Dapper.SqlMapper;
+using Dapper;
 
 namespace Unclutter.Services.Converters
 {
-    public class UriTypeHandler : TypeHandler<Uri>
+    public class UriTypeHandler : SqlMapper.TypeHandler<Uri>
 
     {
         public override void SetValue(IDbDataParameter parameter, Uri value)
@@ -14,7 +14,7 @@ namespace Unclutter.Services.Converters
 
         public override Uri Parse(object value)
         {
-            if (!(value is string str)) return null;
+            if (value is not string str) return null;
             try
             {
                 return new Uri(str);

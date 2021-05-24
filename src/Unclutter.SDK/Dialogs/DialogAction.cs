@@ -2,7 +2,6 @@
 {
     public enum DialogAction
     {
-        Close,
         Cancel,
         LeftButton,
         MidButton,

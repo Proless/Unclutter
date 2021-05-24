@@ -1,0 +1,294 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Unclutter" xml:space="preserve">
+    <value>Unclutter</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="FlowDirection" xml:space="preserve">
+    <value>LeftToRight</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="AuthMethod1" xml:space="preserve">
+    <value>Option 1: Melden Sie sich an und autorisieren Sie diese Anwendung</value>
+  </data>
+  <data name="Authorize" xml:space="preserve">
+    <value>Autorisieren</value>
+  </data>
+  <data name="AuthMethod2" xml:space="preserve">
+    <value>Option 2: Geben Sie einen persönlichen API-Schlüssel an</value>
+  </data>
+  <data name="Get_API_Key" xml:space="preserve">
+    <value>API-Schlüssel holen</value>
+  </data>
+  <data name="API_Key_TextBox_Hint" xml:space="preserve">
+    <value>Geben Sie hier Ihren persönlichen API-Schlüssel ein</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="FontSize" xml:space="preserve">
+    <value>11</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Wird geladen...</value>
+  </data>
+  <data name="Logs" xml:space="preserve">
+    <value>Protokolle</value>
+  </data>
+  <data name="Loading_Status" xml:space="preserve">
+    <value>{0} wird geladen...</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>Benachrichtigungen</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="Unclutter_Startup" xml:space="preserve">
+    <value>Unclutter - Start</value>
+  </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>Verbindung wird hergestellt...</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Benutzer</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-Mail</value>
+  </data>
+  <data name="Premium" xml:space="preserve">
+    <value>Premium</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Profiles" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="Get_Started" xml:space="preserve">
+    <value>Erste Schritte</value>
+  </data>
+  <data name="DFolder_Msg_Select" xml:space="preserve">
+    <value>Wähle den Ordner zum Herunterladen von Mods</value>
+  </data>
+  <data name="DFolder_Msg_Invalid" xml:space="preserve">
+    <value>Der Download-Ordner ist ungültig !</value>
+  </data>
+  <data name="DFolder_Msg_Required" xml:space="preserve">
+    <value>Der Download-Ordner ist erforderlich !</value>
+  </data>
+  <data name="Profile_Name_Msg_Invalid" xml:space="preserve">
+    <value>Der Name enthält ungültige Zeichen !</value>
+  </data>
+  <data name="Profile_Name_Msg_Required" xml:space="preserve">
+    <value>Ein Profilname ist erforderlich !</value>
+  </data>
+  <data name="Games_TextBox_Search_Hint" xml:space="preserve">
+    <value>Suche nach spiele...</value>
+  </data>
+  <data name="Games_Loading" xml:space="preserve">
+    <value>Spiele werden geladen ...</value>
+  </data>
+  <data name="Server_Connection_Error_Internal" xml:space="preserve">
+    <value>Beim Herstellen einer Verbindung zum NexusMods-Server ist ein interner Fehler aufgetreten !</value>
+  </data>
+  <data name="API_Key_Msg_Invalid_Error" xml:space="preserve">
+    <value>Der bereitgestellte API-Schlüssel enthält ungültige Zeichen !</value>
+  </data>
+  <data name="API_Key_Msg_Validating_Error" xml:space="preserve">
+    <value>Konto / API-Schlüssel kann nicht überprüft werden \ nFehler: {0}</value>
+  </data>
+  <data name="Server_Connection_Error" xml:space="preserve">
+    <value>Server kann nicht erreicht werden \ nBitte überprüfen Sie Ihre Netzwerkeinstellungen / Verbindung!</value>
+  </data>
+  <data name="API_Key_Msg_Validating_Success" xml:space="preserve">
+    <value>Benutzer: {0}\nE-Mail: {1}\nPremium: {2}</value>
+  </data>
+  <data name="Folder_Msg_Creation_Error" xml:space="preserve">
+    <value>Ordner {0} kann nicht erstellt werden.\nStellen Sie sicher, dass Sie Lese- / Schreibberechtigungen haben!</value>
+  </data>
+  <data name="Profile_Msg_Delete_Confirm" xml:space="preserve">
+    <value>Möchten Sie das Profil {0} wirklich löschen ?</value>
+  </data>
+  <data name="Profile_Msg_Delete_Error" xml:space="preserve">
+    <value>Das Profil {0} kann nicht gelöscht werden!</value>
+  </data>
+  <data name="Profile_New" xml:space="preserve">
+    <value>Neues profil erstellen...</value>
+  </data>
+  <data name="Profile_New_Hint" xml:space="preserve">
+    <value>Erstellen Sie ein neues Profil, ein Profil ist spielspezifisch und erfordert ein NexusMods-Konto</value>
+  </data>
+  <data name="App_Startup_Error" xml:space="preserve">
+    <value>Die Anwendung konnte aufgrund eines internen Fehlers nicht gestartet werden\nSiehe Protokolldatei\n {0}</value>
+  </data>
+  <data name="Profile_Switch" xml:space="preserve">
+    <value>Profil umstellen</value>
+  </data>
+  <data name="Profile_Get_Started" xml:space="preserve">
+    <value>Erstellen Sie zunächst ein neues Profil!</value>
+  </data>
+  <data name="Profile_Hint" xml:space="preserve">
+    <value>Ein Profil ist spielspezifisch und erfordert ein NexusMods-Konto !</value>
+  </data>
+  <data name="Profile_Name" xml:space="preserve">
+    <value>Profil name</value>
+  </data>
+  <data name="Profile_Name_Hint" xml:space="preserve">
+    <value>Geben Sie einen Profilnamen ein</value>
+  </data>
+  <data name="DFolder_Location" xml:space="preserve">
+    <value>Downloads ordner</value>
+  </data>
+  <data name="DFolder_Location_Hint" xml:space="preserve">
+    <value>Suchen Sie nach dem Speicherort für Downloads</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>Durchsuche</value>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>Konto</value>
+  </data>
+  <data name="Account_Select_Hint" xml:space="preserve">
+    <value>Wählen Sie ein Konto aus oder fügen Sie es hinzu</value>
+  </data>
+  <data name="Game" xml:space="preserve">
+    <value>Spiel</value>
+  </data>
+  <data name="Game_Select_Hint" xml:space="preserve">
+    <value>Spiel auswählen</value>
+  </data>
+</root>

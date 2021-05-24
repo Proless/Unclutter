@@ -1,18 +1,19 @@
-﻿using System;
+﻿using Prism.Commands;
+using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Prism.Commands;
+using System.Windows;
 
 namespace Unclutter.Modules.Commands
 {
     public class AsyncDelegateCommand<T> : DelegateCommand<T>
     {
-        /** Fields **/
+        /* Fields */
         protected Func<T, Task> ExecuteAsync;
         protected bool ContinueOnCapturedContext;
         protected bool Executing;
 
-        /** Constructors **/
+        /* Constructors */
         public AsyncDelegateCommand(Func<T, Task> executeAsync) :
             this(executeAsync, p => true, false)
         {
@@ -31,8 +32,7 @@ namespace Unclutter.Modules.Commands
             Executing = false;
         }
 
-        /** Methods **/
-
+        /* Methods */
         public new AsyncDelegateCommand<T> ObservesProperty<TType>(Expression<Func<TType>> propertyExpression)
         {
             base.ObservesProperty(propertyExpression);
@@ -50,7 +50,7 @@ namespace Unclutter.Modules.Commands
             try
             {
                 Executing = true;
-                await ExecuteAsync((T)parameter);
+                await Application.Current.Dispatcher.InvokeAsync(() => ExecuteAsync((T)parameter)).Task.Unwrap();
             }
             catch (Exception ex)
             {

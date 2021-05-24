@@ -1,6 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using Unclutter.SDK.IModels;
-using Unclutter.Services.Converters;
 using Unclutter.Services.Games;
 
 namespace Unclutter.Services.Profiles
@@ -17,11 +16,15 @@ namespace Unclutter.Services.Profiles
 
         public string DownloadsDirectory { get; set; }
 
-        [JsonConverter(typeof(TypeConverter<GameDetails, IGameDetails>))]
-        public IGameDetails Game { get; set; }
+        public GameDetails Game { get; set; }
 
-        [JsonConverter(typeof(TypeConverter<UserDetails, IUserDetails>))]
-        public IUserDetails User { get; set; }
+        public UserDetails User { get; set; }
+
+        [JsonIgnore]
+        IGameDetails IUserProfile.Game => Game;
+
+        [JsonIgnore]
+        IUserDetails IUserProfile.User => User;
 
         public bool IsValid()
         {

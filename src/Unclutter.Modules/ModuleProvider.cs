@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Prism.Ioc;
+using Prism.Modularity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Prism.Ioc;
-using Prism.Modularity;
-using Unclutter.Modules.Attributes;
 
 namespace Unclutter.Modules
 {
@@ -16,30 +15,23 @@ namespace Unclutter.Modules
 
         /* Properties */
         public IEnumerable<IModuleEntry> Modules => _moduleEntries;
+        public event Action<IModuleEntry> ModuleAdded;
 
         /* Constructors */
         public ModuleProvider(IModuleManager moduleManager, IContainerExtension containerExtension)
         {
             _moduleManager = moduleManager;
             _containerRegistry = containerExtension;
+            moduleManager.LoadModuleCompleted += OnModuleLoadCompleted;
             GetModules();
         }
 
-        /* Methods */
-        public void AddModule(IModuleEntry module)
+        private void OnModuleLoadCompleted(object sender, LoadModuleCompletedEventArgs e)
         {
-            if (module == null) return;
-
-            RegisterModuleViews(module);
-            _moduleEntries.Add(module);
-        }
-        public object ResolveView(IModuleView moduleView)
-        {
-            return _containerRegistry.Resolve(moduleView.ViewType);
-        }
-        public void RegisterView(IModuleView moduleView)
-        {
-            InternalRegisterView(moduleView);
+            if (e.Error == null)
+            {
+                InternalAddModule(e.ModuleInfo);
+            }
         }
 
         /* Helpers */
@@ -50,6 +42,7 @@ namespace Unclutter.Modules
                 InternalAddModule(moduleInfo);
             }
         }
+
         private void InternalAddModule(IModuleInfo moduleInfo)
         {
             var module = Type.GetType(moduleInfo.ModuleType).GetCustomAttributes<ModuleMetadataAttribute>().FirstOrDefault();
@@ -58,34 +51,27 @@ namespace Unclutter.Modules
             var entry = CreateModuleEntry(moduleInfo, module);
             RegisterModuleViews(entry);
             _moduleEntries.Add(entry);
+            ModuleAdded?.Invoke(entry);
         }
+
         private ModuleEntry CreateModuleEntry(IModuleInfo moduleInfo, IModuleMetadata metadata)
         {
-            return new ModuleEntry()
+            return new ModuleEntry
             {
-                Name = metadata.Name,
-                Author = metadata.Author,
-                Description = metadata.Description,
-                Version = metadata.Version,
                 ModuleLocation = moduleInfo.Ref,
-                Views = GetViews<ModuleViewAttribute>(moduleInfo),
-                SettingViews = GetViews<ModuleSettingsViewAttribute>(moduleInfo)
+                Metadata = metadata,
+                Views = GetViews<ExportModuleViewAttribute>(moduleInfo)
             };
         }
+
         private void RegisterModuleViews(IModuleEntry module)
         {
-            var views = module.Views;
-            var settings = module.SettingViews;
-            foreach (var view in views.Union(settings))
+            foreach (var view in module.Views)
             {
-                InternalRegisterView(view);
+                _containerRegistry.RegisterForNavigation(view.ViewType, view.ViewType.GUID.ToString());
             }
         }
-        private void InternalRegisterView(IModuleView view)
-        {
-            if (view is null) return;
-            _containerRegistry.RegisterForNavigation(view.ViewType, view.ViewType.GUID.ToString());
-        }
+
         private IEnumerable<IModuleView> GetViews<T>(IModuleInfo moduleInfo) where T : Attribute, IModuleView
         {
             var views = new List<IModuleView>();
@@ -94,7 +80,13 @@ namespace Unclutter.Modules
                 var moduleType = Type.GetType(moduleInfo.ModuleType);
                 var moduleViews = moduleType.GetCustomAttributes<T>()
                     .Where(t => t.ViewType != null)
-                    .Select(v => new ModuleView(v.ViewType, v.Label, v.IconId, v.GroupName, v.ItemPriority));
+                    .Select(v => new ModuleView
+                    {
+                        ViewType = v.ViewType,
+                        IconRef = v.IconRef,
+                        Label = v.Label,
+                        Priority = v.Priority
+                    });
                 views.AddRange(moduleViews);
             }
             catch (Exception)

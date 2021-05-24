@@ -1,12 +1,12 @@
-﻿namespace Unclutter.SDK.IServices
+﻿using Unclutter.SDK.Loader;
+
+namespace Unclutter.SDK.IServices
 {
-    public interface IDirectoryService
+    public interface IDirectoryService : ILoader
     {
-        string LocalsDirectory { get; }
         string WorkingDirectory { get; }
         string DataDirectory { get; }
         string ExtensionsDirectory { get; }
-        void InitializeDirectories();
         void EnsureDirectoryAccess(string dir);
     }
 }

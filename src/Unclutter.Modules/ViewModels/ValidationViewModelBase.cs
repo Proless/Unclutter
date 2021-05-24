@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Prism.Ioc;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Unclutter.SDK.IServices;
 
 namespace Unclutter.Modules.ViewModels
 {
@@ -15,6 +17,12 @@ namespace Unclutter.Modules.ViewModels
 
         /* Properties */
         public bool IsValidating { get; set; } = true;
+        public ILocalizationProvider LocalizationProvider { get; }
+
+        protected ValidationViewModelBase() : base()
+        {
+            LocalizationProvider = ContainerLocator.Container.Resolve<ILocalizationProvider>();
+        }
 
         /* Methods */
         protected override bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
@@ -53,12 +61,13 @@ namespace Unclutter.Modules.ViewModels
                 return false;
             }
         }
-        
+
         /* Helpers */
         private void ValidateProperty<T>(string propertyName, T value)
         {
             var results = new List<ValidationResult>();
             var context = new ValidationContext(this) { MemberName = propertyName };
+            context.InitializeServiceProvider(LocalizationServiceProvider);
             Validator.TryValidateProperty(value, context, results);
 
             if (results.Any())
@@ -71,6 +80,12 @@ namespace Unclutter.Modules.ViewModels
             }
             RaiseErrorsChanged(propertyName);
         }
+
+        private object LocalizationServiceProvider(Type arg)
+        {
+            return arg.Equals(typeof(ILocalizationProvider)) ? LocalizationProvider : null;
+        }
+
         private void RaiseErrorsChanged(string propertyName)
         {
             ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));

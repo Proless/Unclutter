@@ -1,0 +1,64 @@
+﻿<UserControl x:Class="Modules.Profiles.Views.GameSelectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
+             prism:ViewModelLocator.AutoWireViewModel="True">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Template.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="100" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <TextBox Grid.ColumnSpan="4"
+                 Margin="4"
+                 FontSize="14"
+                 Style="{StaticResource Style.TextBox.Search}"
+                 Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, Delay=300}" />
+
+        <ListBox Grid.Row="1"
+                 Grid.ColumnSpan="4"
+                 Grid.Column="0"
+                 ItemTemplate="{StaticResource Item.Game}"
+                 ItemsSource="{Binding GamesView}"
+                 SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 Margin="4">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <vwp:VirtualizingWrapPanel Margin="0"
+                                               IsContainerVirtualizable="True"
+                                               IsVirtualizing="True"
+                                               IsVirtualizingWhenGrouping="True"
+                                               VirtualizationMode="Recycling" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Padding"
+                            Value="0" />
+                    <Setter Property="Margin"
+                            Value="2,4" />
+                </Style>
+            </ListBox.ItemContainerStyle>
+        </ListBox>
+
+    </Grid>
+</UserControl>

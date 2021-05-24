@@ -5,6 +5,6 @@
         Information,
         Warning,
         Error,
-        Progress
+        Task
     }
 }

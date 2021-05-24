@@ -13,19 +13,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.SDK", "Unclutter.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.Services", "Unclutter.Services\Unclutter.Services.csproj", "{3862741D-4D28-45FD-9341-3297FB71D4D6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.Services.WPF", "Unclutter.Services.WPF\Unclutter.Services.WPF.csproj", "{41FA56B1-0F11-41E3-98A7-074BA328AA3E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.NexusAPI", "Unclutter.NexusAPI\Unclutter.NexusAPI.csproj", "{122A941D-3057-4820-8A68-29AC4B51B64F}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.Prism", "Unclutter.Prism\Unclutter.Prism.csproj", "{73744BDE-6244-4E86-B919-D3F18CDE2C7E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.Modules", "Unclutter.Modules\Unclutter.Modules.csproj", "{FA9AA9B8-E83C-47DB-B18D-777A052EECAB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EF4DBCC7-F9F6-4CA7-BDA4-BD1C4799790C}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		..\build.cake = ..\build.cake
 		..\.config\dotnet-tools.json = ..\.config\dotnet-tools.json
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Modules.DownloadsManager", "Modules.DownloadsManager\Modules.DownloadsManager.csproj", "{494FFE35-9208-43BC-BC80-5CBB2B0E74E5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.API", "Unclutter.API\Unclutter.API.csproj", "{2FE67E28-91C7-462D-9FD6-04B52D7CCC4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,27 +48,27 @@ Global
 		{3862741D-4D28-45FD-9341-3297FB71D4D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3862741D-4D28-45FD-9341-3297FB71D4D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3862741D-4D28-45FD-9341-3297FB71D4D6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{41FA56B1-0F11-41E3-98A7-074BA328AA3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{41FA56B1-0F11-41E3-98A7-074BA328AA3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{41FA56B1-0F11-41E3-98A7-074BA328AA3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{41FA56B1-0F11-41E3-98A7-074BA328AA3E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{122A941D-3057-4820-8A68-29AC4B51B64F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{122A941D-3057-4820-8A68-29AC4B51B64F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{122A941D-3057-4820-8A68-29AC4B51B64F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{122A941D-3057-4820-8A68-29AC4B51B64F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{73744BDE-6244-4E86-B919-D3F18CDE2C7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{73744BDE-6244-4E86-B919-D3F18CDE2C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{73744BDE-6244-4E86-B919-D3F18CDE2C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{73744BDE-6244-4E86-B919-D3F18CDE2C7E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FA9AA9B8-E83C-47DB-B18D-777A052EECAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FA9AA9B8-E83C-47DB-B18D-777A052EECAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA9AA9B8-E83C-47DB-B18D-777A052EECAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA9AA9B8-E83C-47DB-B18D-777A052EECAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{494FFE35-9208-43BC-BC80-5CBB2B0E74E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{494FFE35-9208-43BC-BC80-5CBB2B0E74E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{494FFE35-9208-43BC-BC80-5CBB2B0E74E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{494FFE35-9208-43BC-BC80-5CBB2B0E74E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FE67E28-91C7-462D-9FD6-04B52D7CCC4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FE67E28-91C7-462D-9FD6-04B52D7CCC4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FE67E28-91C7-462D-9FD6-04B52D7CCC4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FE67E28-91C7-462D-9FD6-04B52D7CCC4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{494FFE35-9208-43BC-BC80-5CBB2B0E74E5} = {300C1FF5-B3B0-4C14-80C3-D3782137FE15}
+	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		RESX_SaveFilesImmediatelyUponChange = False
 		SolutionGuid = {7B862E43-26B7-4AF3-B96D-5F2186724B9F}
 	EndGlobalSection
 EndGlobal

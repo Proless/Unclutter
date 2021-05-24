@@ -11,7 +11,7 @@ namespace Unclutter.SDK.IModels
         long Downloads { get; }
         long Mods { get; }
         Uri ForumUrl { get; set; }
-        Uri NexusmodsUrl { get; set; }
+        Uri NexusModsUrl { get; set; }
         string Genre { get; set; }
         long FileCount { get; set; }
         DateTimeOffset? ApprovedDate { get; set; }
@@ -19,5 +19,6 @@ namespace Unclutter.SDK.IModels
         long Authors { get; set; }
         long FileEndorsements { get; set; }
         IEnumerable<IGameCategory> Categories { get; }
+        object ImageSource { get; }
     }
 }

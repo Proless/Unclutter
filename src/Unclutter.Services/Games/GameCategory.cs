@@ -1,22 +1,22 @@
-﻿using Newtonsoft.Json;
-using Unclutter.NexusAPI.Converters;
+﻿using System.Text.Json.Serialization;
+using Unclutter.API.Converters;
 using Unclutter.SDK.IModels;
 
 namespace Unclutter.Services.Games
 {
     public class GameCategory : IGameCategory
     {
-        [JsonProperty("category_id")]
+        [JsonPropertyName("category_id")]
         public long Id { get; set; }
 
         [JsonIgnore]
         public long GameId { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("parent_category")]
-        [JsonConverter(typeof(NullableLongConverter))]
+        [JsonPropertyName("parent_category")]
+        [JsonConverter(typeof(ParentCategoryIdConverter))]
         public long? ParentCategoryId { get; set; }
     }
 }

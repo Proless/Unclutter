@@ -1,6 +1,6 @@
-﻿using Dapper;
-using System;
+﻿using System;
 using System.Data;
+using Dapper;
 
 namespace Unclutter.Services.Converters
 {
@@ -13,7 +13,7 @@ namespace Unclutter.Services.Converters
 
         public override DateTimeOffset Parse(object value)
         {
-            if (!(value is long seconds)) return new DateTimeOffset();
+            if (value is not long seconds) return new DateTimeOffset();
             try
             {
                 var time = DateTimeOffset.FromUnixTimeSeconds(seconds);

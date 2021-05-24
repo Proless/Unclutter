@@ -4,23 +4,27 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Unclutter.SDK.Data;
 using Unclutter.SDK.IModels;
 using Unclutter.SDK.IServices;
 using Unclutter.Services.Data;
+using Unclutter.Services.Images;
 
 namespace Unclutter.Services.Games
 {
     public class GamesProvider : IGamesProvider
     {
         /* Services */
-        private readonly IAppDatabaseProvider _appDatabaseProvider;
-        private readonly IJSONService _jsonService;
+        private readonly IDatabaseProvider _dbProvider;
+        private readonly IJsonService _jsonService;
+        private readonly IImageProvider _imageProvider;
 
         /* Constructors */
-        public GamesProvider(IAppDatabaseProvider appDatabaseProvider, IJSONService jsonService)
+        public GamesProvider(ISqliteDatabaseFactory sqliteDatabaseFactory, IJsonService jsonService, IImageProvider imageProvider)
         {
-            _appDatabaseProvider = appDatabaseProvider;
+            _dbProvider = sqliteDatabaseFactory.CreateOrGet(LocalIdentifiers.Database.App);
             _jsonService = jsonService;
+            _imageProvider = imageProvider;
             Initialize();
         }
 
@@ -32,7 +36,7 @@ namespace Unclutter.Services.Games
 
         public void Save(IEnumerable<IGameDetails> games)
         {
-            _appDatabaseProvider.TransactionalSqlCommand((db, transaction) =>
+            _dbProvider.TransactionalSqlCommand((db, transaction) =>
             {
                 foreach (var game in games)
                 {
@@ -51,7 +55,7 @@ namespace Unclutter.Services.Games
         #region CRUD
         public IEnumerable<IGameDetails> ReadAll()
         {
-            return _appDatabaseProvider.TransactionalSqlQuery<IEnumerable<IGameDetails>>((db, transaction) =>
+            return _dbProvider.TransactionalSqlQuery<IEnumerable<IGameDetails>>((db, transaction) =>
             {
                 // TODO: do inner join it is faster, but it makes the implementation more complicated.
                 var selectGames = "SELECT * FROM Game";
@@ -61,6 +65,7 @@ namespace Unclutter.Services.Games
                 {
                     var categories = db.Query<GameCategory>(selectCategories, new { game.Id }, transaction);
                     game.Categories = categories;
+                    game.ImageSource = _imageProvider.GetImageFor(game);
                 }
                 return games;
             });
@@ -68,7 +73,7 @@ namespace Unclutter.Services.Games
 
         public IGameDetails ReadById(long id)
         {
-            return _appDatabaseProvider.TransactionalSqlQuery<IGameDetails>((db, transaction) =>
+            return _dbProvider.TransactionalSqlQuery<IGameDetails>((db, transaction) =>
             {
                 // TODO: do inner join.
                 var selectGame = "SELECT * FROM Game WHERE Id = @Id";
@@ -79,6 +84,7 @@ namespace Unclutter.Services.Games
 
                 var categories = db.Query<GameCategory>(selectCategories, new { GameId = id }, transaction);
                 game.Categories = categories;
+                game.ImageSource = _imageProvider.GetImageFor(game);
 
                 return game;
             });
@@ -88,7 +94,7 @@ namespace Unclutter.Services.Games
         {
             if (entity is null) return null;
 
-            _appDatabaseProvider.TransactionalSqlCommand((db, transaction) =>
+            _dbProvider.TransactionalSqlCommand((db, transaction) =>
             {
                 db.Execute(SqliteScripts.Table.Game.Insert, entity, transaction);
                 foreach (var category in entity.Categories)
@@ -104,7 +110,7 @@ namespace Unclutter.Services.Games
         {
             if (entity is null) return null;
 
-            _appDatabaseProvider.TransactionalSqlCommand((db, transaction) =>
+            _dbProvider.TransactionalSqlCommand((db, transaction) =>
             {
                 db.Execute(SqliteScripts.Table.Game.Update, entity, transaction);
 
@@ -124,7 +130,7 @@ namespace Unclutter.Services.Games
         {
             if (entity is null) return null;
 
-            _appDatabaseProvider.TransactionalSqlCommand((db, transaction) =>
+            _dbProvider.TransactionalSqlCommand((db, transaction) =>
             {
                 db.Execute(SqliteScripts.Table.Game.Delete, new { entity.Id }, transaction);
             });
@@ -135,10 +141,18 @@ namespace Unclutter.Services.Games
         /* Helpers */
         private void Initialize()
         {
+            // Create database required tables
+            _dbProvider.TransactionalSqlCommand((db, transaction) =>
+            {
+                // Order of Table creation is important.
+                db.Execute(SqliteScripts.Table.Game.Create, transaction);
+                db.Execute(SqliteScripts.Table.GameCategory.Create, transaction);
+            });
+
             var sql = @"SELECT * FROM Game LIMIT 10";
 
-            var db = _appDatabaseProvider.GetConnection();
-            var games = db.Query<GameDetails>(sql);
+            var dbConnection = _dbProvider.GetConnection();
+            var games = dbConnection.Query<GameDetails>(sql);
 
             if (!games.Any())
                 Save(GetEmbeddedGames());
