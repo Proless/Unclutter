@@ -8,13 +8,15 @@
              xmlns:converters="clr-namespace:Unclutter.Theme.Converters;assembly=Unclutter.Theme"
              xmlns:profilesManagement="clr-namespace:Unclutter.ViewModels.ProfilesManagement"
              xmlns:lex="https://github.com/XAMLMarkupExtensions/WPFLocalizationExtension"
+             xmlns:boolean="clr-namespace:Unclutter.Theme.Converters.Boolean;assembly=Unclutter.Theme"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance profilesManagement:AuthenticationViewModel}"
-             MinWidth="500">
+             MinWidth="500"
+             MaxWidth="700">
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <boolean:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <Style TargetType="{x:Type TextBox}"
                    BasedOn="{StaticResource MaterialDesignFilledTextBox}">
                 <Setter Property="materialDesign:HintAssist.IsFloating"
@@ -71,6 +73,7 @@
                 Command="{Binding AuthorizeCommand}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{lex:Loc {x:Static sdk:ResourceKeys.Authorize}}"
+                           TextWrapping="Wrap"
                            VerticalAlignment="Center"
                            Margin="4 0" />
                 <materialDesign:PackIcon Kind="OpenInNew"
@@ -108,9 +111,10 @@
                 Command="{Binding BrowseUrlCommand}"
                 CommandParameter="https://www.nexusmods.com/users/myaccount?tab=api+access">
             <StackPanel Orientation="Horizontal">
-                <TextBlock  Text="{lex:Loc {x:Static sdk:ResourceKeys.Get_API_Key}}"
-                            VerticalAlignment="Center"
-                            Margin="4 0" />
+                <TextBlock Text="{lex:Loc {x:Static sdk:ResourceKeys.Get_API_Key}}"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           Margin="4 0" />
                 <materialDesign:PackIcon Kind="OpenInNew"
                                          Height="20"
                                          Width="20"
@@ -142,7 +146,7 @@
                     Grid.Row="4"
                     Orientation="Horizontal"
                     VerticalAlignment="Center"
-                    HorizontalAlignment="Center">
+                    HorizontalAlignment="Right">
 
             <ProgressBar Margin="4"
                          IsIndeterminate="True"
@@ -156,6 +160,7 @@
                     Command="{Binding CancelCommand}"
                     Content="{materialDesign:PackIcon Kind=CloseCircle, Size=18}"
                     Visibility="{Binding IsWaiting, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
         </StackPanel>
 
     </Grid>

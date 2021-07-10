@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Services;
 
 namespace Unclutter.Services
 {

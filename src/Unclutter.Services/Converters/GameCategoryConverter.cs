@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Unclutter.SDK.IModels;
+using Unclutter.SDK.Models;
 using Unclutter.Services.Games;
 
 namespace Unclutter.Services.Converters
@@ -37,7 +37,7 @@ namespace Unclutter.Services.Converters
                     switch (propertyName)
                     {
                         case "category_id":
-                            category.Id = reader.GetInt64();
+                            category.Id = reader.GetInt32();
                             break;
                         case "name":
                             category.Name = reader.GetString();
@@ -45,7 +45,7 @@ namespace Unclutter.Services.Converters
                         case "parent_category":
                             if (reader.TokenType == JsonTokenType.Number)
                             {
-                                category.ParentCategoryId = reader.GetInt64();
+                                category.ParentCategoryId = reader.GetInt32();
                             }
                             else
                             {

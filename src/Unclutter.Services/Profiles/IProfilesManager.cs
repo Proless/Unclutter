@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Unclutter.SDK.Data;
-using Unclutter.SDK.IModels;
+using Unclutter.SDK.Models;
 
 namespace Unclutter.Services.Profiles
 {
@@ -14,7 +14,7 @@ namespace Unclutter.Services.Profiles
         IEnumerable<IUserProfile> EnumerateProfiles();
         IEnumerable<IUserDetails> EnumerateUsers();
         void Save(IEnumerable<IUserProfile> profiles);
-        void ChangeProfile(IUserProfile profile);
+        void LoadProfile(IUserProfile profile);
         IUserProfile Create(string name, string downloadsDirectory, IGameDetails game, IUserDetails user);
     }
 

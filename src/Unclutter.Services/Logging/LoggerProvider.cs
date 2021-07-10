@@ -2,7 +2,7 @@
 using Serilog.Formatting.Json;
 using System;
 using System.IO;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Services;
 using ILogger = Unclutter.SDK.Common.ILogger;
 
 namespace Unclutter.Services.Logging

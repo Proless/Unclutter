@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Unclutter.SDK.Common;
-using Unclutter.SDK.Loader;
+using Unclutter.SDK.Plugins;
+using Unclutter.SDK.Progress;
 
 namespace Unclutter.Services.Loader
 {
     public interface ILoaderService
     {
-        event Action<ProgressReport> ProgressChanged;
-        event Action Finished;
+        event Action<ProgressReport> LoadProgressed;
+        event Action LoadFinished;
         bool IsLoading { get; }
+        bool IsLoaded { get; }
         Task Load();
         Task Load(ILoader loader);
-        void RegisterLoader(ILoader loader);
-        void RegisterLoader<T>() where T : ILoader;
     }
 }

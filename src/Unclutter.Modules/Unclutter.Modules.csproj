@@ -6,7 +6,6 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Prism.DryIoc" Version="8.0.0.1909" />
-		<PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\Unclutter.SDK\Unclutter.SDK.csproj" />

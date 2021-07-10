@@ -19,7 +19,7 @@
 		<PackageReference Include="Dapper" Version="2.0.90" />
 		<PackageReference Include="Serilog" Version="2.10.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
-		<PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.7" />
+		<PackageReference Include="System.Data.SQLite.Core" Version="1.0.114" />
 		<PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
 		<PackageReference Include="Ookii.Dialogs.Wpf" Version="3.1.0" />
 	</ItemGroup>
@@ -35,7 +35,7 @@
 		<Compile Update="Dialogs\Message\MessageDialogView.xaml.cs">
 			<SubType>Code</SubType>
 		</Compile>
-		<Compile Update="Dialogs\TaskDlg\TaskDialogView.xaml.cs">
+		<Compile Update="Dialogs\Task\TaskDialogView.xaml.cs">
 			<SubType>Code</SubType>
 		</Compile>
 	</ItemGroup>
@@ -45,7 +45,7 @@
 			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 			<SubType>Designer</SubType>
 		</Page>
-		<Page Update="Dialogs\TaskDlg\TaskDialogView.xaml">
+		<Page Update="Dialogs\Task\TaskDialogView.xaml">
 			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 			<SubType>Designer</SubType>
 		</Page>

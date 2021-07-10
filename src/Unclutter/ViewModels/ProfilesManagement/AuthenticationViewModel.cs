@@ -1,6 +1,5 @@
 ﻿using Prism.Commands;
 using System;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Net.WebSockets;
 using System.Threading;
@@ -10,15 +9,15 @@ using Unclutter.Modules.Commands;
 using Unclutter.Modules.ViewModels;
 using Unclutter.SDK;
 using Unclutter.SDK.Common;
-using Unclutter.SDK.IModels;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Models;
+using Unclutter.SDK.Services;
 using Unclutter.SDK.Validation;
 using Unclutter.Services.Authentication;
 using Unclutter.Services.Images;
 
 namespace Unclutter.ViewModels.ProfilesManagement
 {
-    public class AuthenticationViewModel : ValidationViewModelBase
+    public class AuthenticationViewModel : BaseValidationViewModel
     {
         public const string ApplicationReference = "vortex";
 
@@ -26,6 +25,7 @@ namespace Unclutter.ViewModels.ProfilesManagement
         private readonly ILogger _logger;
         private readonly IAuthenticationService _authenticationService;
         private readonly IImageProvider _imageProvider;
+        private readonly IClientServices _clientServices;
 
         /* Fields */
         private string _apiKey;
@@ -64,11 +64,15 @@ namespace Unclutter.ViewModels.ProfilesManagement
         public DelegateCommand<string> BrowseUrlCommand => new DelegateCommand<string>(BrowseUrl);
 
         /* Constructor */
-        public AuthenticationViewModel(IAuthenticationService authenticationService, ILoggerProvider loggerProvider, IImageProvider imageProvider)
+        public AuthenticationViewModel(IAuthenticationService authenticationService,
+            ILogger logger,
+            IImageProvider imageProvider,
+            IClientServices clientServices)
         {
             _authenticationService = authenticationService;
             _imageProvider = imageProvider;
-            _logger = loggerProvider.GetInstance();
+            _clientServices = clientServices;
+            _logger = logger;
 
             IsWaiting = false;
             WaitingMessage = "";
@@ -77,8 +81,7 @@ namespace Unclutter.ViewModels.ProfilesManagement
         /* Methods */
         public void BrowseUrl(string url)
         {
-            var psi = new ProcessStartInfo { UseShellExecute = true, FileName = url };
-            Process.Start(psi);
+            _clientServices.OpenInDefaultApp(url);
         }
 
         public void Cancel()
@@ -115,14 +118,12 @@ namespace Unclutter.ViewModels.ProfilesManagement
             {
                 var user = await validateFunc(_cts.Token);
                 await _imageProvider.DownloadImageFor(user);
-                EventAggregator.GetEvent<UserSelectedEvent>().Publish(user);
-                WaitingMessage = string.Format(LocalizationProvider.GetLocalizedString(ResourceKeys.API_Key_Msg_Validating_Success),
-                    user.Name, user.Email, (user.IsPremium ? LocalizationProvider.GetLocalizedString(ResourceKeys.Yes) : LocalizationProvider.GetLocalizedString(ResourceKeys.No)));
+                EventAggregator.PublishOnBackgroundThread(new UserSelectedEvent(user));
+                WaitingMessage = LocalizationProvider.GetLocalizedString(ResourceKeys.API_Key_Msg_Validating_Success, new object[] { user.Name, user.Email, user.IsPremium ? LocalizationProvider.GetLocalizedString(ResourceKeys.Yes) : LocalizationProvider.GetLocalizedString(ResourceKeys.No) });
             }
             catch (APIException ex)
             {
-                WaitingMessage =
-                    string.Format(LocalizationProvider.GetLocalizedString(ResourceKeys.API_Key_Msg_Validating_Error), ex.Message);
+                WaitingMessage = LocalizationProvider.GetLocalizedString(ResourceKeys.API_Key_Msg_Validating_Error, ex.Message);
             }
             catch (TaskCanceledException)
             {
@@ -131,21 +132,21 @@ namespace Unclutter.ViewModels.ProfilesManagement
             }
             catch (Exception ex) when (ex is HttpRequestException || ex is WebSocketException)
             {
-                WaitingMessage = string.Format(LocalizationProvider.GetLocalizedString(ResourceKeys.Server_Connection_Error));
+                WaitingMessage = LocalizationProvider.GetLocalizedString(ResourceKeys.Server_Connection_Error);
                 _logger.Error(ex, ex.Message);
 
             }
             catch (Exception ex)
             {
-                WaitingMessage = string.Format(LocalizationProvider.GetLocalizedString(ResourceKeys.Server_Connection_Error_Internal));
+                WaitingMessage = LocalizationProvider.GetLocalizedString(ResourceKeys.Server_Connection_Error_Internal);
                 _logger.Error(ex, ex.Message);
             }
             finally
             {
-                IsWaiting = false;
                 APIKey = "";
-                await Task.Delay(2000);
+                await Task.Delay(4000);
                 WaitingMessage = "";
+                IsWaiting = false;
             }
         }
     }

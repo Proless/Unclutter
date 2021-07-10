@@ -1,17 +1,16 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media;
-using Unclutter.SDK.IModels;
+using Unclutter.SDK.Images;
+using Unclutter.SDK.Models;
 
 namespace Unclutter.Services.Images
 {
-    public interface IImageProvider : IDisposable
+    public interface IImageProvider
     {
-        public Task<ImageSource> DownloadImageFor(IGameDetails game, CancellationToken cancellationToken = default);
-        public Task<ImageSource> DownloadImageFor(IUserDetails user, CancellationToken cancellationToken = default);
-        public ImageSource GetImageFor(IGameDetails game);
-        public ImageSource GetImageFor(IUserDetails user);
-        public ImageSource GetImageFrom(string file, int height, int width);
+        public Task<ImageReference> DownloadImageFor(IGameDetails game, CancellationToken cancellationToken = default);
+        public Task<ImageReference> DownloadImageFor(IUserDetails user, CancellationToken cancellationToken = default);
+        public ImageReference GetImageFor(IGameDetails game);
+        public ImageReference GetImageFor(IUserDetails user);
+        public ImageReference GetImageFrom(string file, int height, int width);
     }
 }

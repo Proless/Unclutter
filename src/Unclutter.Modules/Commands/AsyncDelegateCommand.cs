@@ -53,14 +53,14 @@ namespace Unclutter.Modules.Commands
             }
             catch (Exception ex)
             {
-                OnException(ex);
+                ThrowOnException(ex);
             }
             finally
             {
                 Executing = false;
             }
         }
-        protected virtual void OnException(Exception ex)
+        protected virtual void ThrowOnException(Exception ex)
         {
             throw ex;
         }

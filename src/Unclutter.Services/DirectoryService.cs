@@ -4,17 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Threading.Tasks;
-using Unclutter.SDK.Common;
-using Unclutter.SDK.IServices;
-using Unclutter.SDK.Loader;
+using Unclutter.SDK.Services;
 
 namespace Unclutter.Services
 {
-    public class DirectoryService : IDirectoryService, ILoader
+    public class DirectoryService : IDirectoryService
     {
         /* Fields */
-        private bool _isInitialized;
         private readonly string[] _dirs = new string[10];
 
         /* Properties */
@@ -33,6 +29,11 @@ namespace Unclutter.Services
             get => _dirs[2];
             private set => _dirs[2] = value;
         }
+        public string CacheDirectory
+        {
+            get => _dirs[3];
+            private set => _dirs[3] = value;
+        }
 
         /* Constructors */
         public DirectoryService()
@@ -40,6 +41,9 @@ namespace Unclutter.Services
             WorkingDirectory = Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory);
             ExtensionsDirectory = Path.Combine(WorkingDirectory, "extensions");
             DataDirectory = Path.Combine(WorkingDirectory, "data");
+            CacheDirectory = Path.Combine(DataDirectory, "cache");
+
+            Initialize();
         }
 
         /* Methods */
@@ -51,8 +55,6 @@ namespace Unclutter.Services
                 throw new UnauthorizedAccessException($"Unable to access the following directory{Environment.NewLine}{dir}");
             }
         }
-
-        /* Helpers */
         public static bool EnsureRWPermissions(string dir)
         {
             return EnsureReadPermissions(dir) && EnsureWritePermissions(dir);
@@ -98,38 +100,30 @@ namespace Unclutter.Services
             return hasAccess;
         }
 
-        #region ILoader
-        public event Action<ProgressReport> ProgressChanged;
-        public LoadOptions LoaderOptions { get; set; }
-        public Task Load()
+        /* Helpers */
+        private void Initialize()
         {
-            if (!_isInitialized)
+            // Checking each directory for existing and read/write permissions.
+            var errors = new List<string>();
+            foreach (var dir in _dirs.Where(s => !string.IsNullOrWhiteSpace(s)))
             {
-                // Checking each directory for existing and read/write permissions.
-                var errors = new List<string>();
-                foreach (var dir in _dirs.Where(s => !string.IsNullOrWhiteSpace(s)))
+                var hasAccess = EnsureExist(dir) && EnsureRWPermissions(dir);
+                if (!hasAccess)
                 {
-                    var hasAccess = EnsureExist(dir) && EnsureRWPermissions(dir);
-                    if (!hasAccess)
-                    {
-                        errors.Add(dir);
-                    }
+                    errors.Add(dir);
                 }
-
-                // Throw an exception if any errors occurred
-                if (errors.Any())
-                {
-                    var errorMessage = "Unable to access the following directories:";
-                    foreach (var error in errors)
-                    {
-                        errorMessage += $"{Environment.NewLine}{error}";
-                    }
-                    throw new UnauthorizedAccessException(errorMessage);
-                }
-                _isInitialized = true;
             }
-            return Task.CompletedTask;
+
+            // Throw an exception if any errors occurred
+            if (errors.Any())
+            {
+                var errorMessage = "Unable to access the following directories:";
+                foreach (var error in errors)
+                {
+                    errorMessage += $"{Environment.NewLine}{error}";
+                }
+                throw new UnauthorizedAccessException(errorMessage);
+            }
         }
-        #endregion
     }
 }

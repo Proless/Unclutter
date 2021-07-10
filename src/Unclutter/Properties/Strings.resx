@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
+	<!-- 
 		Microsoft ResX Schema
 
 		Version 1.3
@@ -58,217 +58,253 @@
 			: using a System.ComponentModel.TypeConverter
 			: and then encoded with base64 encoding.
 	-->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>1.3</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="Unclutter" xml:space="preserve">
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>1.3</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="Unclutter" xml:space="preserve">
     <value>Unclutter</value>
   </data>
-  <data name="Profile" xml:space="preserve">
+	<data name="Profile" xml:space="preserve">
     <value>Profile</value>
   </data>
-  <data name="FlowDirection" xml:space="preserve">
+	<data name="FlowDirection" xml:space="preserve">
     <value>LeftToRight</value>
   </data>
-  <data name="Back" xml:space="preserve">
+	<data name="Back" xml:space="preserve">
     <value>Back</value>
   </data>
-  <data name="AuthMethod1" xml:space="preserve">
+	<data name="AuthMethod1" xml:space="preserve">
     <value>Option 1: Login and authorize this application</value>
   </data>
-  <data name="AuthMethod2" xml:space="preserve">
+	<data name="AuthMethod2" xml:space="preserve">
     <value>Option 2: Provide a personal API Key</value>
   </data>
-  <data name="Authorize" xml:space="preserve">
+	<data name="Authorize" xml:space="preserve">
     <value>Authorize</value>
   </data>
-  <data name="Get_API_Key" xml:space="preserve">
+	<data name="Get_API_Key" xml:space="preserve">
     <value>Get API Key</value>
   </data>
-  <data name="API_Key_TextBox_Hint" xml:space="preserve">
+	<data name="API_Key_TextBox_Hint" xml:space="preserve">
     <value>Copy and paste your personal API Key here</value>
   </data>
-  <data name="Cancel" xml:space="preserve">
+	<data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="FontSize" xml:space="preserve">
+	<data name="FontSize" xml:space="preserve">
     <value>12</value>
   </data>
-  <data name="Close" xml:space="preserve">
+	<data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>
-  <data name="Loading" xml:space="preserve">
+	<data name="Loading" xml:space="preserve">
     <value>Loading...</value>
   </data>
-  <data name="Logs" xml:space="preserve">
+	<data name="Logs" xml:space="preserve">
     <value>Logs</value>
   </data>
-  <data name="Notifications" xml:space="preserve">
+	<data name="Notifications" xml:space="preserve">
     <value>Notifications</value>
   </data>
-  <data name="Settings" xml:space="preserve">
+	<data name="Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <data name="Unclutter_Startup" xml:space="preserve">
+	<data name="Unclutter_Startup" xml:space="preserve">
     <value>Unclutter - Startup</value>
   </data>
-  <data name="API_Key_Msg_Invalid_Error" xml:space="preserve">
+	<data name="API_Key_Msg_Invalid_Error" xml:space="preserve">
     <value>The API Key provided contains invalid characters !</value>
   </data>
-  <data name="Connecting" xml:space="preserve">
+	<data name="Connecting" xml:space="preserve">
     <value>Connecting...</value>
   </data>
-  <data name="User" xml:space="preserve">
+	<data name="User" xml:space="preserve">
     <value>User</value>
   </data>
-  <data name="Email" xml:space="preserve">
+	<data name="Email" xml:space="preserve">
     <value>Email</value>
   </data>
-  <data name="Premium" xml:space="preserve">
+	<data name="Premium" xml:space="preserve">
     <value>Premium</value>
   </data>
-  <data name="Yes" xml:space="preserve">
+	<data name="Yes" xml:space="preserve">
     <value>Yes</value>
   </data>
-  <data name="No" xml:space="preserve">
+	<data name="No" xml:space="preserve">
     <value>No</value>
   </data>
-  <data name="Error" xml:space="preserve">
+	<data name="Error" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="API_Key_Msg_Validating_Error" xml:space="preserve">
-    <value>Unable to validate the account / API Key\nError: {0}</value>
+	<data name="API_Key_Msg_Validating_Error" xml:space="preserve">
+    <value>Unable to validate the account / API Key
+Error: {0}</value>
   </data>
-  <data name="Server_Connection_Error" xml:space="preserve">
-    <value>Unable to reach the server\nPlease check your Network settings / connection!</value>
+	<data name="Server_Connection_Error" xml:space="preserve">
+    <value>Unable to reach the server !
+Please check your Network settings / connection</value>
   </data>
-  <data name="API_Key_Msg_Validating_Success" xml:space="preserve">
-    <value>User: {0}\nEmail: {1}\nPremium: {2}</value>
+	<data name="API_Key_Msg_Validating_Success" xml:space="preserve">
+    <value>User: {0}
+Email: {1}
+Premium: {2}</value>
   </data>
-  <data name="Server_Connection_Error_Internal" xml:space="preserve">
+	<data name="Server_Connection_Error_Internal" xml:space="preserve">
     <value>An Internal error occurred while connecting to the NexusMods Server !</value>
   </data>
-  <data name="Games_Loading" xml:space="preserve">
+	<data name="Games_Loading" xml:space="preserve">
     <value>Loading games...</value>
   </data>
-  <data name="Games_TextBox_Search_Hint" xml:space="preserve">
+	<data name="Games_TextBox_Search_Hint" xml:space="preserve">
     <value>Search for game...</value>
   </data>
-  <data name="Loading_Status" xml:space="preserve">
+	<data name="Loading_Status" xml:space="preserve">
     <value>Loading {0}...</value>
   </data>
-  <data name="Profile_Name_Msg_Required" xml:space="preserve">
+	<data name="Profile_Name_Msg_Required" xml:space="preserve">
     <value>A profile name is required !</value>
   </data>
-  <data name="Profile_Name_Msg_Invalid" xml:space="preserve">
+	<data name="Profile_Name_Msg_Invalid" xml:space="preserve">
     <value>The profile name contains invalid characters !</value>
   </data>
-  <data name="DFolder_Msg_Required" xml:space="preserve">
+	<data name="DFolder_Msg_Required" xml:space="preserve">
     <value>The Downloads folder is required !</value>
   </data>
-  <data name="DFolder_Msg_Invalid" xml:space="preserve">
+	<data name="DFolder_Msg_Invalid" xml:space="preserve">
     <value>The Downloads folder is invalid !</value>
   </data>
-  <data name="DFolder_Msg_Select" xml:space="preserve">
+	<data name="DFolder_Msg_Select" xml:space="preserve">
     <value>Choose the mods downloads folder</value>
   </data>
-  <data name="Folder_Msg_Creation_Error" xml:space="preserve">
-    <value>Unable to create the folder {0}.\nMake sure you have read/write permissions !</value>
+	<data name="Folder_Msg_Creation_Error" xml:space="preserve">
+    <value>Unable to create the folder {0}.
+Make sure you have read/write permissions !</value>
   </data>
-  <data name="Profile_Msg_Delete_Error" xml:space="preserve">
-    <value>Can't delete the profile {0}!</value>
+	<data name="Profile_Msg_Delete_Error" xml:space="preserve">
+    <value>Can't delete the profile {0}.</value>
   </data>
-  <data name="OK" xml:space="preserve">
+	<data name="OK" xml:space="preserve">
     <value>OK</value>
   </data>
-  <data name="Profile_Msg_Delete_Confirm" xml:space="preserve">
+	<data name="Profile_Msg_Delete_Confirm" xml:space="preserve">
     <value>Are you sure you want to delete the profile {0} ?</value>
   </data>
-  <data name="Profiles" xml:space="preserve">
+	<data name="Profiles" xml:space="preserve">
     <value>Profiles</value>
   </data>
-  <data name="Get_Started" xml:space="preserve">
+	<data name="Get_Started" xml:space="preserve">
     <value>Get Started</value>
   </data>
-  <data name="Profile_New" xml:space="preserve">
+	<data name="Profile_New" xml:space="preserve">
     <value>Create new profile...</value>
   </data>
-  <data name="Profile_New_Hint" xml:space="preserve">
+	<data name="Profile_New_Hint" xml:space="preserve">
     <value>Create a new profile, a profile is game-specific and requires a nexus mods account</value>
   </data>
-  <data name="App_Startup_Error" xml:space="preserve">
-    <value>Couldn't start the application due to internal error\nsee logs file\n{0}</value>
+	<data name="App_Startup_Error" xml:space="preserve">
+    <value>Couldn't start the application due to internal error. See logs file:
+{0}</value>
   </data>
-  <data name="Profile_Switch" xml:space="preserve">
+	<data name="Profile_Switch" xml:space="preserve">
     <value>Switch profile</value>
   </data>
-  <data name="Profile_Get_Started" xml:space="preserve">
+	<data name="Profile_Get_Started" xml:space="preserve">
     <value>Get started by creating a new profile !</value>
   </data>
-  <data name="Profile_Hint" xml:space="preserve">
-    <value>A profile is game-specific and requires a nexus mods account !</value>
+	<data name="Profile_Hint" xml:space="preserve">
+    <value>A profile is game-specific and requires a nexus mods account</value>
   </data>
-  <data name="Profile_Name" xml:space="preserve">
+	<data name="Profile_Name" xml:space="preserve">
     <value>Profile name</value>
   </data>
-  <data name="Profile_Name_Hint" xml:space="preserve">
+	<data name="Profile_Name_Hint" xml:space="preserve">
     <value>Enter a profile name</value>
   </data>
-  <data name="DFolder_Location" xml:space="preserve">
+	<data name="DFolder_Location" xml:space="preserve">
     <value>Downloads location</value>
   </data>
-  <data name="DFolder_Location_Hint" xml:space="preserve">
+	<data name="DFolder_Location_Hint" xml:space="preserve">
     <value>Browse for the downloads location</value>
   </data>
-  <data name="Browse" xml:space="preserve">
+	<data name="Browse" xml:space="preserve">
     <value>Browse</value>
   </data>
-  <data name="Account" xml:space="preserve">
+	<data name="Account" xml:space="preserve">
     <value>Account</value>
   </data>
-  <data name="Account_Select_Hint" xml:space="preserve">
-    <value>Select or add an account to use with this profile</value>
+	<data name="Account_Select_Hint" xml:space="preserve">
+    <value>Select or add an account to use with this profile.</value>
   </data>
-  <data name="Game" xml:space="preserve">
+	<data name="Game" xml:space="preserve">
     <value>Game</value>
   </data>
-  <data name="Game_Select_Hint" xml:space="preserve">
+	<data name="Game_Select_Hint" xml:space="preserve">
     <value>Select game</value>
   </data>
+	<data name="Plugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+	<data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+	<data name="Games_Preparing" xml:space="preserve">
+		<value>Preparing game files...</value>
+	</data>
+	<data name="CloseAll" xml:space="preserve">
+		<value>Close all</value>
+	</data>
+	<data name="Tasks" xml:space="preserve">
+		<value>Tasks</value>
+	</data>
+	<data name="Account_Add" xml:space="preserve">
+		<value>Add new account</value>
+	</data>
+	<data name="Select" xml:space="preserve">
+		<value>Select</value>
+	</data>
+	<data name="Reload" xml:space="preserve">
+		<value>Reload</value>
+	</data>
+	<data name="RestoreDefaultSettings" xml:space="preserve">
+		<value>Restore all defaults</value>
+	</data>
+	<data name="Restore" xml:space="preserve">
+		<value>Restore</value>
+	</data>
 </root>

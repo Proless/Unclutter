@@ -6,4 +6,9 @@ namespace Unclutter.SDK.Plugins
     {
         ImportOptions Options { get; }
     }
+
+    public class ImportOptions
+    {
+        public bool AutoImport { get; set; } = true;
+    }
 }

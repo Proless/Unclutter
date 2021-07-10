@@ -11,7 +11,6 @@ namespace Unclutter.Views.Dialogs
     {
         public StartupDialogView(IRegionManager regionManager)
         {
-
             InitializeComponent();
             RegionManager.SetRegionName(StartupRegion, CommonIdentifiers.Regions.Startup);
             RegionManager.SetRegionManager(StartupRegion, regionManager);

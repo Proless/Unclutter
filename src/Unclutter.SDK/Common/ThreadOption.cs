@@ -2,7 +2,7 @@
 {
     public enum ThreadOption
     {
-        None,
+        Default,
         UIThread,
         BackgroundThread
     }

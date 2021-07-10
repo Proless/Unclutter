@@ -1,0 +1,133 @@
+﻿<UserControl x:Class="Unclutter.Services.Notifications.Message.MessageNotificationControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:material="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:lex="http://wpflocalizeextension.codeplex.com"
+             xmlns:sdk="clr-namespace:Unclutter.SDK;assembly=Unclutter.SDK"
+             xmlns:local="clr-namespace:Unclutter.Services.Notifications.Message"
+             xmlns:controls="clr-namespace:Unclutter.Theme.Controls;assembly=Unclutter.Theme"
+             xmlns:boolean="clr-namespace:Unclutter.Theme.Converters.Boolean;assembly=Unclutter.Theme"
+             xmlns:commonConverters="clr-namespace:Unclutter.Theme.Converters;assembly=Unclutter.Theme"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance local:MessageNotification}">
+
+    <UserControl.Resources>
+        <commonConverters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <boolean:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+        <boolean:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Expander Grid.Row="0"
+                  material:ExpanderAssist.HorizontalHeaderPadding="4 8">
+            <Expander.Header>
+                <Grid Background="Transparent">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <controls:ReferencedImage Grid.Row="0"
+                                              Grid.Column="0"
+                                              Width="32"
+                                              Height="32"
+                                              Margin="4 0"
+                                              VerticalAlignment="Center"
+                                              ImageReference="{Binding Icon}"
+                                              Visibility="{Binding Icon, Converter={StaticResource NullToVisibilityConverter}}" />
+
+                    <StackPanel Grid.Row="0"
+                                Grid.Column="1"
+                                Orientation="Vertical"
+                                VerticalAlignment="Center">
+
+                        <TextBlock Margin="4 0"
+                                   TextAlignment="Left"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center"
+                                   FontWeight="Normal"
+                                   FontSize="14"
+                                   Visibility="{Binding Text, Converter={StaticResource NullToVisibilityConverter}, RelativeSource={RelativeSource Self}}"
+                                   Text="{Binding Title}" />
+
+                        <TextBlock Margin="4 0"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="NoWrap"
+                                   VerticalAlignment="Center"
+                                   Visibility="{Binding IsExpanded, Converter={StaticResource InverseBooleanToVisibilityConverter}, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Expander}}"
+                                   Text="{Binding Message}" />
+
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="2"
+                               TextAlignment="Left"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center"
+                               FontWeight="Light"
+                               FontSize="12"
+                               Text="{Binding Created, StringFormat={}{0:ddd hh:mm}}">
+                        <TextBlock.ToolTip>
+                            <ToolTip Content="{Binding Created}"
+                                     ContentStringFormat="dddd, dd MMMM yyyy" />
+                        </TextBlock.ToolTip>
+                    </TextBlock>
+
+                    <Button Grid.Row="0"
+                            Grid.Column="3"
+                            Padding="0"
+                            Margin="2 0"
+                            Height="18"
+                            Width="18"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding IsMouseOver, Converter={StaticResource BooleanToVisibilityConverter},  RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
+                            Command="{Binding CloseCommand}"
+                            Style="{DynamicResource Style.Button.Flat}"
+                            ToolTip="{lex:Loc {x:Static sdk:ResourceKeys.Close}}"
+                            Content="{material:PackIcon Close, Size=16}" />
+
+                </Grid>
+            </Expander.Header>
+            <Expander.Content>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Margin="8 4"
+                               MaxHeight="160"
+                               TextTrimming="CharacterEllipsis"
+                               TextWrapping="Wrap"
+                               Text="{Binding Message}" />
+
+                    <Button Grid.Row="1"
+                            Margin="0 4"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Content="{Binding ActionLabel}"
+                            Command="{Binding ActionClickedCommand}"
+                            Style="{DynamicResource Style.Button.Flat}"
+                            Visibility="{Binding Content, Converter={StaticResource NullToVisibilityConverter}, RelativeSource={RelativeSource Self}}" />
+                </Grid>
+            </Expander.Content>
+        </Expander>
+
+        <Border Grid.Row="1"
+                Height="2"
+                Style="{DynamicResource HorizontalDividerBorder}" />
+
+    </Grid>
+</UserControl>

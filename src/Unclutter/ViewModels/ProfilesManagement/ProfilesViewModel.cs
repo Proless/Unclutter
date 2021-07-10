@@ -1,5 +1,5 @@
 ﻿using Prism.Commands;
-using Prism.Regions;
+using Prism.Services.Dialogs;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -9,18 +9,19 @@ using Unclutter.Modules.ViewModels;
 using Unclutter.SDK;
 using Unclutter.SDK.Common;
 using Unclutter.SDK.Dialogs;
-using Unclutter.SDK.IModels;
-using Unclutter.SDK.IServices;
-using Unclutter.Services.Localization;
+using Unclutter.SDK.Events;
+using Unclutter.SDK.Models;
+using Unclutter.SDK.Services;
 using Unclutter.Services.Profiles;
 
 namespace Unclutter.ViewModels.ProfilesManagement
 {
-    public class ProfilesViewModel : ViewModelBase
+    public class ProfilesViewModel : BaseViewModel, IHandler<ProfileCreatedEvent>
     {
         /* Services */
         private readonly IProfilesManager _profilesManager;
         private readonly IDialogProvider _dialogProvider;
+        private readonly IEventAggregator _eventAggregator;
         private readonly ILogger _logger;
 
         /* Fields */
@@ -32,27 +33,29 @@ namespace Unclutter.ViewModels.ProfilesManagement
             get => _profiles;
             set => SetProperty(ref _profiles, value);
         }
+        public HandlerOptions HandlerOptions => new HandlerOptions();
 
         /* Commands */
         public DelegateCommand<IUserProfile> DeleteProfileCommand => new AsyncDelegateCommand<IUserProfile>(DeleteProfile);
-        public DelegateCommand<IUserProfile> SelectProfileCommand => new DelegateCommand<IUserProfile>(SelectProfile);
+        public DelegateCommand<IUserProfile> LoadProfileCommand => new DelegateCommand<IUserProfile>(LoadProfile);
 
         /* Constructor */
-        public ProfilesViewModel(IProfilesManager profilesManager, IDialogProvider dialogProvider, ILoggerProvider loggerProvider)
+        public ProfilesViewModel(IProfilesManager profilesManager, IDialogProvider dialogProvider, ILogger logger, IEventAggregator eventAggregator)
         {
             _profilesManager = profilesManager;
             _dialogProvider = dialogProvider;
-            _logger = loggerProvider.GetInstance();
+            _eventAggregator = eventAggregator;
+            _logger = logger;
 
             Profiles = new SynchronizedObservableCollection<IUserProfile>();
-
-            EventAggregator.GetEvent<ProfileCreatedEvent>().Subscribe(Populate);
+            Populate();
         }
 
         /* Methods */
-        public override void OnNavigatedTo(NavigationContext navigationContext)
+        public void Populate()
         {
-            Populate();
+            Profiles.Clear();
+            Profiles.AddRange(_profilesManager.EnumerateProfiles());
         }
 
         public async Task DeleteProfile(IUserProfile profile)
@@ -60,21 +63,20 @@ namespace Unclutter.ViewModels.ProfilesManagement
             if (profile.Id == _profilesManager.CurrentProfile?.Id)
             {
                 await _dialogProvider
-                    .Message("", string.Format(LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.Profile_Msg_Delete_Error), profile.Name))
-                    .LeftButton(LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.OK))
-                    .Icon(DialogIcon.Warning)
+                    .Message("", LocalizationProvider.GetLocalizedString(ResourceKeys.Profile_Msg_Delete_Error, profile.Name))
+                    .LeftButton(LocalizationProvider.GetLocalizedString(ResourceKeys.OK))
+                    .Icon(IconType.Warning)
                     .Create()
                     .ShowDialogAsync();
 
                 return;
             }
 
-
             await _dialogProvider
-                .Message("", string.Format(LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.Profile_Msg_Delete_Confirm), profile.Name))
-                .LeftButton(LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.Yes))
-                .RightButton(LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.No))
-                .Icon(DialogIcon.Question)
+                .Message("", LocalizationProvider.GetLocalizedString(ResourceKeys.Profile_Msg_Delete_Confirm, profile.Name))
+                .LeftButton(LocalizationProvider.GetLocalizedString(ResourceKeys.Yes))
+                .RightButton(LocalizationProvider.GetLocalizedString(ResourceKeys.No))
+                .Icon(IconType.Question)
                 .Create()
                 .ShowDialogAsync((_, action) =>
                 {
@@ -95,19 +97,20 @@ namespace Unclutter.ViewModels.ProfilesManagement
                 });
         }
 
-        public void SelectProfile(IUserProfile profile)
+        public void LoadProfile(IUserProfile profile)
         {
             if (profile != null && profile.IsValid())
             {
-                _profilesManager.ChangeProfile(profile);
+                var oldProfile = _profilesManager.CurrentProfile;
+                _profilesManager.LoadProfile(profile);
+                _eventAggregator.PublishOnCurrentThread(new CloseStartupDialogEvent(new DialogResult(ButtonResult.OK)));
+                _eventAggregator.PublishOnCurrentThread(new ProfileLoadedEvent(profile, oldProfile));
             }
         }
 
-        /* Helpers */
-        private void Populate()
+        public void Handle(ProfileCreatedEvent @event)
         {
-            Profiles.Clear();
-            Profiles.AddRange(_profilesManager.EnumerateProfiles());
+            Populate();
         }
     }
 }

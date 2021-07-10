@@ -6,14 +6,13 @@ using Unclutter.Modules.Helpers;
 using Unclutter.Modules.ViewModels;
 using Unclutter.SDK;
 using Unclutter.SDK.Common;
-using Unclutter.SDK.IModels;
-using Unclutter.SDK.Loader;
+using Unclutter.SDK.Models;
+using Unclutter.SDK.Progress;
 using Unclutter.Services.Games;
-using Unclutter.Services.Localization;
 
 namespace Unclutter.ViewModels.ProfilesManagement
 {
-    public class GamesSelectionViewModel : ViewModelBase, ILoader
+    public class GamesSelectionViewModel : BaseViewModel
     {
         /* Services */
         private readonly IGamesProvider _gamesProvider;
@@ -37,7 +36,7 @@ namespace Unclutter.ViewModels.ProfilesManagement
             set
             {
                 SetProperty(ref _selectedGame, value);
-                EventAggregator.GetEvent<GameSelectedEvent>().Publish(value);
+                EventAggregator.PublishOnBackgroundThread(new GameSelectedEvent(value));
             }
         }
         public string GameHint
@@ -66,17 +65,39 @@ namespace Unclutter.ViewModels.ProfilesManagement
             _gamesProvider = gamesProvider;
 
             Games = new SynchronizedObservableCollection<IGameDetails>();
-            GameHint = "Loading...";
-            ProgressChanged += OnProgressChanged;
+            GameHint = LocalizationProvider.GetLocalizedString(ResourceKeys.Games_Loading);
+
             CollectionViewSource.GetDefaultView(Games).Filter += FilterGame;
         }
 
+        /* Methods */
+        public override Task OnViewLoaded()
+        {
+            return LoadGames();
+        }
+
         /* Helpers */
+        private async Task LoadGames()
+        {
+            if (IsLoading) return;
+
+            IsLoading = true;
+            var count = 0;
+            var games = await Task.Run(() => _gamesProvider.EnumerateGames().OrderByDescending(g => g.Downloads).ToList());
+            foreach (var game in games)
+            {
+                var progress = count / (games.Count * 100d);
+                OnProgressChanged(new ProgressReport(LocalizationProvider.GetLocalizedString(ResourceKeys.Loading_Status, game.Name), progress));
+                Games.Add(game);
+                count++;
+            }
+            OnProgressChanged(new ProgressReport("", 0d, OperationStatus.Completed));
+        }
         private void OnProgressChanged(ProgressReport report)
         {
             if (report.Status == OperationStatus.Completed)
             {
-                GameHint = LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.Games_TextBox_Search_Hint);
+                GameHint = LocalizationProvider.GetLocalizedString(ResourceKeys.Games_TextBox_Search_Hint);
                 IsLoading = false;
             }
             else
@@ -98,24 +119,5 @@ namespace Unclutter.ViewModels.ProfilesManagement
             }
             return false;
         }
-
-        #region ILoader
-        public event Action<ProgressReport> ProgressChanged;
-        public LoadOptions LoaderOptions => new LoadOptions();
-        public async Task Load()
-        {
-            ProgressChanged?.Invoke(new ProgressReport(LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.Games_Loading)));
-            var count = 0;
-            var games = await Task.Run(() => _gamesProvider.EnumerateGames().OrderByDescending(g => g.Downloads).ToList());
-            foreach (var game in games)
-            {
-                var progress = count / (games.Count * 100d);
-                ProgressChanged?.Invoke(new ProgressReport(string.Format(LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.Loading_Status), game.Name), progress));
-                Games.Add(game);
-                count++;
-            }
-            ProgressChanged?.Invoke(new ProgressReport("", 0d, OperationStatus.Completed));
-        }
-        #endregion
     }
 }

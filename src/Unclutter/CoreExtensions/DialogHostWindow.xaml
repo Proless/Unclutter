@@ -1,0 +1,9 @@
+﻿<Window x:Class="Unclutter.CoreExtensions.DialogHostWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sdk="clr-namespace:Unclutter.SDK;assembly=Unclutter.SDK"
+        xmlns:lex="https://github.com/XAMLMarkupExtensions/WPFLocalizationExtension"
+        FlowDirection="{lex:Loc {x:Static sdk:ResourceKeys.FlowDirection}}"
+        Style="{DynamicResource Style.Window.Dialog}"/>
+
+

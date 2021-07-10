@@ -2,8 +2,8 @@
 
 namespace Unclutter.Services.Notifications
 {
-    internal abstract class BaseNotificationConfig
+    public class BaseNotificationConfig
     {
-        public abstract event Action<BaseNotification> Created;
+        internal Action<BaseNotification> Created { get; set; }
     }
 }

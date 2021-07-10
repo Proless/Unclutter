@@ -17,7 +17,7 @@ namespace Unclutter.AppInstance
         private static IntPtr WM_SUCCESS = new IntPtr(400);
 
         /* Properties */
-        public static event Action<string[]> NewArguments;
+        public static event Action<string[]> NewInstanceStarted;
 
         /* Methods */
         public static void VerifyApplicationInstance()
@@ -77,20 +77,10 @@ namespace Unclutter.AppInstance
 
             if (data == null) return IntPtr.Zero;
 
-            if (Application.Current.MainWindow == null)
-                return IntPtr.Zero;
-
-            if (Application.Current.MainWindow.WindowState == WindowState.Minimized)
-                Application.Current.MainWindow.WindowState = WindowState.Normal;
-
-            Application.Current.MainWindow.Activate();
-
-            Win32.SetForegroundWindow(new WindowInteropHelper(Application.Current.MainWindow).Handle);
-
             var args = data.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             if (args[0] == Constants.Unclutter)
             {
-                NewArguments?.Invoke(args.Skip(1).ToArray());
+                NewInstanceStarted?.Invoke(args.Skip(1).ToArray());
                 handled = true;
                 return WM_SUCCESS;
             }

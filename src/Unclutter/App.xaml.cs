@@ -6,21 +6,21 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Windows.Interop;
 using Unclutter.AppInstance;
-using Unclutter.Initialization;
+using Unclutter.CoreExtensions;
+using Unclutter.Modules;
 using Unclutter.SDK;
 using Unclutter.SDK.Common;
-using Unclutter.SDK.IServices;
-using Unclutter.SDK.Loader;
+using Unclutter.SDK.Images;
 using Unclutter.SDK.Plugins;
+using Unclutter.SDK.Progress;
+using Unclutter.SDK.Services;
 using Unclutter.Services.Container;
+using Unclutter.Services.Dialogs;
 using Unclutter.Services.Loader;
 using Unclutter.Services.Localization;
 using Unclutter.Services.Logging;
@@ -38,10 +38,11 @@ namespace Unclutter
 
         /* Properties */
         public LoaderScreenManager LoaderScreenManager { get; }
-        public ILoaderService LoaderService { get; private set; }
-        public IPluginProvider PluginProvider { get; private set; }
+        public LoaderService LoaderService { get; private set; }
+        public PluginProvider PluginProvider { get; private set; }
         public ILogger Logger { get; private set; }
         public bool IsInitialized { get; private set; }
+        public double? Order => null;
 
         /* Constructor */
         public App()
@@ -64,15 +65,7 @@ namespace Unclutter
                 s.Title = AppInfo.Name;
                 s.Subtitle = $"v{AppInfo.Version}";
                 s.Footer = "Proless";
-
-                var logoImage = new BitmapImage(new Uri("../Resources/logo.png", UriKind.Relative));
-
-                s.Logo = new Image
-                {
-                    Stretch = Stretch.Uniform,
-                    Source = logoImage,
-                    Height = 120
-                };
+                s.Logo = new PackUriImageReference("/Unclutter.Theme;component/Resources/logo.png");
             });
         }
 
@@ -114,12 +107,6 @@ namespace Unclutter
             return null;
         }
 
-        // 3.9
-        protected override void InitializeModules()
-        {
-            // Delay modules initialization.
-        }
-
         // 4
         protected override async void OnInitialized()
         {
@@ -129,32 +116,20 @@ namespace Unclutter
             }
             catch (Exception ex)
             {
-                LogUnhandledException(ex, "Setup");
-                LoaderScreenManager.ReportProgress(new ProgressReport(string.Format(LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.App_Startup_Error), Logger.Location), 0d, OperationStatus.Error));
-                await Task.Delay(TimeSpan.FromSeconds(15));
-                Shutdown(-1);
-            }
-        }
-
-        public async void OnNewArguments(string[] args)
-        {
-            if (!IsInitialized) return;
-
-            var handlers = PluginProvider.Container.GetExportedValues<ICommandLineArgumentsHandler>().OrderBy(h => h.Priority);
-            foreach (var argsHandler in handlers)
-            {
-                await argsHandler.HandleAsync(args);
+                LogUnhandledException(ex, nameof(Setup));
+                LoaderScreenManager.ReportProgress(new ProgressReport(LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.App_Startup_Error, Logger.Location), 0d, OperationStatus.Error));
+                await Task.Delay(TimeSpan.FromSeconds(30));
+                Environment.Exit(-1);
             }
         }
 
         /* Helpers */
         private async Task Setup()
         {
-            // configure Prism
+            // Configure VM Factory
             ViewModelLocationProvider.SetDefaultViewModelFactory((view, type) =>
             {
                 var viewmodel = Container.Resolve(type);
-
                 foreach (var processor in PluginProvider.Container.GetExportedValues<IViewModelProcessor>())
                 {
                     try
@@ -169,30 +144,26 @@ namespace Unclutter
                 return viewmodel;
             });
 
-            // services
-            PluginProvider = Container.Resolve<IPluginProvider>();
-            LoaderService = Container.Resolve<ILoaderService>();
+            // Core Services
+            PluginProvider = Container.Resolve<PluginProvider>();
+            LoaderService = Container.Resolve<LoaderService>();
 
-            // add event handlers
-            LoaderService.ProgressChanged += LoaderScreenManager.ReportProgress;
-            LoaderService.Finished += OnFinishedLoading;
+            // Add event handlers
+            LoaderService.LoadProgressed += LoaderScreenManager.ReportProgress;
+            LoaderService.LoadFinished += OnFinishedLoading;
 
-            // initialize MEF / plugins
-            await LoaderService.Load(PluginProvider);
+            // Initialize core services !! Order is important!!
+            PluginProvider.Initialize();
+            LoaderService.Initialize();
 
-            RegisterLoaders();
-
-            // initialize modules
-            base.InitializeModules();
-
-            // must be the last to register
+            // This will execute after all exported ILoader.
             LoaderService.RegisterLoader(this);
 
-            // load
+            // Start loading.
             await LoaderService.Load();
         }
 
-        private void DelayedInitializeShell()
+        private void DelayedCreateShell()
         {
             var shell = Container.Resolve<ShellView>();
             RegionManager.SetRegionManager(shell, Container.Resolve<IRegionManager>());
@@ -202,11 +173,11 @@ namespace Unclutter
 
         private void OnFinishedLoading()
         {
-            LoaderService.ProgressChanged -= LoaderScreenManager.ReportProgress;
-            LoaderService.Finished -= OnFinishedLoading;
-            LoaderScreenManager.Close();
+            LoaderService.LoadProgressed -= LoaderScreenManager.ReportProgress;
+            LoaderService.LoadFinished -= OnFinishedLoading;
             MainWindow?.Show();
             MainWindow?.Activate();
+            LoaderScreenManager.Close();
         }
 
         private void SetupExceptionHandling()
@@ -247,9 +218,26 @@ namespace Unclutter
             }
         }
 
-        private void RegisterLoaders()
+        private void OnNewInstanceStarted(string[] args)
         {
-            LoaderService.RegisterLoader(Container.Resolve<IDirectoryService>());
+            if (!IsInitialized) return;
+
+            if (Current.MainWindow != null)
+            {
+                if (Current.MainWindow.WindowState == WindowState.Minimized)
+                    Current.MainWindow.WindowState = WindowState.Normal;
+
+                Current.MainWindow.Activate();
+
+                Win32.SetForegroundWindow(new WindowInteropHelper(Current.MainWindow).Handle);
+            }
+
+            var handlers = OrderHelper.GetOrdered(PluginProvider.Container.GetExportedValues<ICommandLineArgumentsHandler>());
+
+            foreach (var argsHandler in handlers)
+            {
+                argsHandler.Handle(args);
+            }
         }
 
         #region ILoader
@@ -259,28 +247,30 @@ namespace Unclutter
         {
             ProgressChanged?.Invoke(new ProgressReport(LoadingMessage));
 
-            DelayedInitializeShell();
+            DelayedCreateShell();
 
-            // configure AppInstanceManager
+            // Configure current application as the single Instance
             AppInstanceManager.SetupApplicationInstance();
-            AppInstanceManager.NewArguments += OnNewArguments;
+            AppInstanceManager.NewInstanceStarted += OnNewInstanceStarted;
 
             IsInitialized = true;
 
-            LoaderScreenManager.Hide();
-
-            Container.Resolve<IDialogService>().ShowDialog(LocalIdentifiers.Dialogs.Startup, result =>
-            {
-                if (result.Result == ButtonResult.OK)
-                {
-                    LoaderScreenManager.Show();
-                    LoaderService.RegisterLoader(MainWindow?.DataContext as ILoader);
-                }
-                else
-                {
-                    Environment.Exit(0);
-                }
-            });
+            Container.Resolve<IDialogService>().ShowDialog(
+                LocalIdentifiers.Dialogs.Startup,
+                null,
+                () => LoaderScreenManager.Hide(),
+                result =>
+              {
+                  if (result.Result == ButtonResult.OK)
+                  {
+                      LoaderScreenManager.Show();
+                      LoaderService.RegisterLoader(MainWindow?.DataContext as ILoader);
+                  }
+                  else
+                  {
+                      Environment.Exit(0);
+                  }
+              }, LocalIdentifiers.Dialogs.StartupWindow);
 
             return Task.CompletedTask;
         }

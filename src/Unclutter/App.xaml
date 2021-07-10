@@ -1,13 +1,13 @@
 ﻿<prism:PrismApplication x:Class="Unclutter.App"
                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                        xmlns:prism="clr-namespace:Prism.DryIoc;assembly=Prism.DryIoc.Wpf">
+                        xmlns:prism="clr-namespace:Prism.DryIoc;assembly=Prism.DryIoc.Wpf"
+                        ShutdownMode="OnMainWindowClose">
 
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Unclutter.Theme;component/Theme.xaml" />
-                <ResourceDictionary Source="/Unclutter;component/Template.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <PopupAnimation x:Key="{x:Static SystemParameters.MenuPopupAnimationKey}">None</PopupAnimation>
         </ResourceDictionary>

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Services;
 using Unclutter.SDK.Settings;
 
 namespace Unclutter.Services.Settings
@@ -16,7 +16,7 @@ namespace Unclutter.Services.Settings
         public T Instance { get; private set; }
         public string Name { get; }
         public string Location { get; }
-        public Type Type { get; }
+        public Type SettingsType { get; }
 
         /* Constructor */
         public Settings(string file, Action<T> defaultsAction, IJsonService jsonService)
@@ -27,14 +27,18 @@ namespace Unclutter.Services.Settings
 
             Name = Path.GetFileNameWithoutExtension(file);
             Location = Path.GetFullPath(file);
-            Type = typeof(T);
+            SettingsType = typeof(T);
 
             Initialize();
         }
 
         /* Methods */
-        public ISettings<TSettings> Get<TSettings>() where TSettings : class, new()
+        public ISettings<TSettings> GetSettings<TSettings>() where TSettings : class, new()
         {
+            if (typeof(TSettings) != SettingsType)
+            {
+                throw new ArgumentException("Typed mismatch exception!", nameof(TSettings));
+            }
             return this as ISettings<TSettings>;
         }
 
@@ -50,6 +54,7 @@ namespace Unclutter.Services.Settings
 
         public void Reset()
         {
+            Instance = Activator.CreateInstance<T>();
             _defaultsAction?.Invoke(Instance);
         }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Services;
 
 namespace Unclutter.SDK.Validation
 {
@@ -8,8 +8,8 @@ namespace Unclutter.SDK.Validation
     public class LocalizedValidationAttribute : ValidationAttribute
     {
         public string ErrorMessageKey { get; set; }
-        public string KeyAssemblyName { get; set; } = Constants.DefaultAssemblyName;
-        public string KeyDictionaryName { get; set; } = Constants.DefaultDictionaryName;
+        public string KeyAssemblyName { get; set; } = ResourceKeys.DefaultAssemblyName;
+        public string KeyDictionaryName { get; set; } = ResourceKeys.DefaultDictionaryName;
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {

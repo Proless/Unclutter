@@ -1,15 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 using Unclutter.API.Converters;
-using Unclutter.SDK.IModels;
+using Unclutter.SDK.Images;
+using Unclutter.SDK.Models;
 
 namespace Unclutter.Services.Games
 {
     public class GameDetails : IGameDetails
     {
+        public GameDetails() { }
+
+        public GameDetails(IGameDetails gameDetails)
+        {
+            Id = gameDetails.Id;
+            Downloads = gameDetails.Downloads;
+            Mods = gameDetails.Mods;
+            ForumUrl = gameDetails.ForumUrl;
+            NexusModsUrl = gameDetails.NexusModsUrl;
+            Genre = gameDetails.Genre;
+            FileCount = gameDetails.FileCount;
+            ApprovedDate = gameDetails.ApprovedDate;
+            FileViews = gameDetails.FileViews;
+            Authors = gameDetails.Authors;
+            FileEndorsements = gameDetails.FileEndorsements;
+            Name = gameDetails.Name;
+            DomainName = gameDetails.DomainName;
+            Categories = gameDetails.Categories.Select(c => new GameCategory(c)).ToList();
+            Image = gameDetails.Image;
+        }
+
+
         [JsonPropertyName("id")]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [JsonPropertyName("downloads")]
         public long Downloads { get; set; }
@@ -49,12 +73,12 @@ namespace Unclutter.Services.Games
         public string DomainName { get; set; }
 
         [JsonPropertyName("categories")]
-        public IEnumerable<GameCategory> Categories { get; set; }
+        public List<GameCategory> Categories { get; set; }
 
         [JsonIgnore]
         IEnumerable<IGameCategory> IGameDetails.Categories => Categories;
 
         [JsonIgnore]
-        public object ImageSource { get; set; }
+        public ImageReference Image { get; set; }
     }
 }

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.Threading.Tasks;
+using Unclutter.SDK.Common;
 
 namespace Unclutter.SDK.Plugins
 {
-    public interface ICommandLineArgumentsHandler
+    public interface ICommandLineArgumentsHandler : IOrderedObject
     {
-        double Priority { get; }
-        Task HandleAsync(string[] args);
+        void Handle(string[] args);
     }
 
     [MetadataAttribute, AttributeUsage(AttributeTargets.Class)]

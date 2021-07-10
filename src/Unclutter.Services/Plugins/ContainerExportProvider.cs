@@ -31,7 +31,7 @@ namespace Unclutter.Services.Plugins
             if (definition.Cardinality == ImportCardinality.ZeroOrMore)
             {
                 exports = from exportDefinition in _definitions
-                          let contractName = ContainerExportDefinition.GetContractName(exportDefinition.ContractType, exportDefinition.RegistrationName)
+                          let contractName = PluginServices.GetContractName(exportDefinition.ContractType, exportDefinition.RegistrationName)
                           where contractName == definition.ContractName
                           select new Export(exportDefinition, exportDefinition.Factory);
             }
@@ -45,13 +45,18 @@ namespace Unclutter.Services.Plugins
             return exports;
         }
 
-        public IContainerExportProvider RegisterExport(Type exportType, string name)
+        public void RegisterAsExport(Type exportType, string name)
         {
             if (CanRegister(exportType, name))
             {
                 var exportDefinition = new ContainerExportDefinition(exportType, name, () => Resolve(exportType, name));
                 _definitions.Add(exportDefinition);
             }
+        }
+
+        public IContainerExportProvider RegisterExport(Type type, Func<object> factory)
+        {
+            _containerAdapter.Register(type, factory);
             return this;
         }
 
@@ -68,7 +73,7 @@ namespace Unclutter.Services.Plugins
 
         private void OnComponentRegistered(RegisteredComponentEventArgs args)
         {
-            RegisterExport(args.Type, args.Name);
+            RegisterAsExport(args.Type, args.Name);
         }
     }
 }

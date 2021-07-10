@@ -1,102 +1,110 @@
-﻿<mahApps:MetroWindow x:Class="Unclutter.Views.ShellView"
-                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-                     xmlns:mahApps="http://metro.mahapps.com/winfx/xaml/controls"
-                     xmlns:prism="http://prismlibrary.com/"
-                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                     xmlns:sdk="clr-namespace:Unclutter.SDK;assembly=Unclutter.SDK"
-                     xmlns:viewModels="clr-namespace:Unclutter.ViewModels"
-                     xmlns:lex="https://github.com/XAMLMarkupExtensions/WPFLocalizationExtension"
-                     mc:Ignorable="d"
-                     prism:ViewModelLocator.AutoWireViewModel="True"
-                     FlowDirection="{lex:Loc {x:Static sdk:ResourceKeys.FlowDirection}}"
-                     Style="{DynamicResource Style.MetroWindow}"
-                     Width="1000"
-                     Height="700"
-                     MinWidth="700"
-                     MinHeight="500"
-                     SizeToContent="Manual"
-                     WindowStartupLocation="CenterScreen"
-                     d:DataContext="{d:DesignInstance viewModels:ShellViewModel}">
+﻿<mah:MetroWindow x:Class="Unclutter.Views.ShellView"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:material="http://materialdesigninxaml.net/winfx/xaml/themes"
+                 xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                 xmlns:prism="http://prismlibrary.com/"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:appWindowCommand="clr-namespace:Unclutter.Modules.Plugins.AppWindowCommand;assembly=Unclutter.Modules"
+                 xmlns:appWindowFlyout="clr-namespace:Unclutter.Modules.Plugins.AppWindowFlyout;assembly=Unclutter.Modules"
+                 xmlns:common="clr-namespace:Unclutter.SDK.Common;assembly=Unclutter.SDK"
+                 xmlns:sdk="clr-namespace:Unclutter.SDK;assembly=Unclutter.SDK"
+                 xmlns:booleanConverters="clr-namespace:Unclutter.Theme.Converters.Boolean;assembly=Unclutter.Theme"
+                 xmlns:commonConverters="clr-namespace:Unclutter.Theme.Converters;assembly=Unclutter.Theme"
+                 xmlns:viewModels="clr-namespace:Unclutter.ViewModels"
+                 xmlns:lex="https://github.com/XAMLMarkupExtensions/WPFLocalizationExtension"
+                 mc:Ignorable="d"
+                 prism:ViewModelLocator.AutoWireViewModel="True"
+                 FlowDirection="{lex:Loc {x:Static sdk:ResourceKeys.FlowDirection}}"
+                 FlyoutOverlayBrush="{DynamicResource Brush.Area.InActive}"
+                 Style="{DynamicResource Style.MetroWindow}"
+                 Width="1000"
+                 Height="700"
+                 MinWidth="700"
+                 MinHeight="500"
+                 SizeToContent="Manual"
+                 WindowStartupLocation="CenterScreen"
+                 d:DataContext="{d:DesignInstance viewModels:ShellViewModel}">
 
-    <mahApps:MetroWindow.Resources>
+    <mah:MetroWindow.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Unclutter.Theme;component/Theme.Extended.xaml" />
+                <ResourceDictionary Source="/Unclutter.Theme;component/Theme.MahApps.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate x:Key="Item.AppWindowCommand"
+                          DataType="appWindowCommand:IAppWindowCommand">
+                <ContentControl Content="{Binding Content}"
+                                ToolTip="{Binding Hint}"
+                                Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </DataTemplate>
+
+            <booleanConverters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <commonConverters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+            <commonConverters:IntEnumConverter x:Key="IntEnumConverter" />
         </ResourceDictionary>
-    </mahApps:MetroWindow.Resources>
+    </mah:MetroWindow.Resources>
 
-    <mahApps:MetroWindow.TitleTemplate>
-        <DataTemplate>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+    <mah:MetroWindow.RightWindowCommands>
+        <mah:WindowCommands ShowLastSeparator="True"
+                            ShowSeparators="True"
+                            SeparatorHeight="7"
+                            ItemTemplate="{StaticResource Item.AppWindowCommand}"
+                            ItemsSource="{Binding AppWindowCommands}">
+        </mah:WindowCommands>
+    </mah:MetroWindow.RightWindowCommands>
 
-                <TextBlock Grid.Column="0"
-                           Style="{DynamicResource MaterialDesignBody1TextBlock}"
-                           Text="{Binding}" />
+    <mah:MetroWindow.Flyouts>
+        <mah:FlyoutsControl OverrideExternalCloseButton="Left"
+                            ItemsSource="{Binding AppWindowFlyouts}">
+            <mah:FlyoutsControl.ItemTemplate>
+                <DataTemplate DataType="appWindowFlyout:IAppWindowFlyout">
+                    <!-- TODO: fix WPFLocalizationExtension causing binding failures (Parent is null) -->
+                    <ContentControl lex:ResxLocalizationProvider.DefaultDictionary="{x:Static sdk:ResourceKeys.DefaultDictionaryName}"
+                                    lex:ResxLocalizationProvider.DefaultAssembly="{x:Static sdk:ResourceKeys.DefaultAssemblyName}"
+                                    Content="{Binding Content}" />
+                </DataTemplate>
+            </mah:FlyoutsControl.ItemTemplate>
+            <mah:FlyoutsControl.ItemContainerStyle>
+                <Style BasedOn="{StaticResource {x:Type mah:Flyout}}"
+                       TargetType="mah:Flyout">
+                    <Setter Property="CloseButtonIsCancel"
+                            Value="True" />
+                    <Setter Property="Tag"
+                            Value="{Binding}" />
+                    <Setter Property="VerticalContentAlignment"
+                            Value="{Binding VerticalContentAlignment}" />
+                    <Setter Property="HorizontalContentAlignment"
+                            Value="{Binding HorizontalContentAlignment}" />
+                    <Setter Property="CloseButtonVisibility"
+                            Value="{Binding ShowCloseButton, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <Setter Property="TitleVisibility"
+                            Value="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}" />
+                    <Setter Property="Position"
+                            Value="{Binding Position, Converter={StaticResource IntEnumConverter}}" />
+                    <Setter Property="IsOpen"
+                            Value="{Binding IsOpen}" />
+                    <Setter Property="Header"
+                            Value="{Binding Title}" />
+                    <Setter Property="IsPinned"
+                            Value="{Binding IsPinned}" />
+                    <Setter Property="IsModal"
+                            Value="{Binding IsModal}" />
+                    <EventSetter Event="ClosingFinished"
+                                 Handler="OnFlyoutClosed" />
+                    <EventSetter Event="OpeningFinished"
+                                 Handler="OnFlyoutOpened" />
+                </Style>
+            </mah:FlyoutsControl.ItemContainerStyle>
+        </mah:FlyoutsControl>
+    </mah:MetroWindow.Flyouts>
 
-                <Button Style="{DynamicResource MahApps.Styles.Button.WindowCommands}"
-                        Grid.Column="1"
-                        ToolTip="{lex:Loc {x:Static sdk:ResourceKeys.Profile}}"
-                        DataContext="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=mahApps:MetroWindow}}">
-                    <materialDesign:PopupBox PlacementMode="BottomAndAlignRightEdges"
-                                             StaysOpen="True">
-                        <materialDesign:PopupBox.ToggleContent>
-                            <materialDesign:PackIcon Kind="ArrowDownCircle"
-                                                     Height="20"
-                                                     Width="20"
-                                                     Foreground="{DynamicResource PrimaryHueMidBrush}" />
-                        </materialDesign:PopupBox.ToggleContent>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-
-                            <Image Grid.Row="0"
-                                   Grid.Column="0"
-                                   Grid.ColumnSpan="2"
-                                   Source="{Binding SelectedProfile.User.ImageSource}" />
-
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="0" />
-
-                            <TextBlock Grid.Row="1"
-                                       Grid.Column="1" />
-
-                            <Button Grid.Row="1"
-                                    Grid.Column="0"
-                                    Grid.ColumnSpan="2"
-                                    Content="{lex:Loc {x:Static sdk:ResourceKeys.Profile_Switch}}" />
-
-                        </Grid>
-                    </materialDesign:PopupBox>
-                </Button>
-            </Grid>
-        </DataTemplate>
-    </mahApps:MetroWindow.TitleTemplate>
-
-    <mahApps:MetroWindow.RightWindowCommands>
-        <mahApps:WindowCommands ItemTemplate="{StaticResource Item.ShellCommandAction}"
-                                ItemsSource="{Binding ShellCommandActions}" />
-    </mahApps:MetroWindow.RightWindowCommands>
-
-    <materialDesign:DialogHost CloseOnClickAway="False"
-                               OverlayBackground="{DynamicResource Brush.Area.InActive}">
+    <material:DialogHost CloseOnClickAway="False"
+                         Identifier="{x:Static common:CommonIdentifiers+Dialogs.MainDialogHostId}"
+                         OverlayBackground="{DynamicResource Brush.Area.InActive}">
         <Grid>
 
         </Grid>
-    </materialDesign:DialogHost>
-</mahApps:MetroWindow>
+    </material:DialogHost>
+</mah:MetroWindow>

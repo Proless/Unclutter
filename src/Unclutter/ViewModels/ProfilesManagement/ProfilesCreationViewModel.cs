@@ -1,9 +1,7 @@
-﻿using Ookii.Dialogs.Wpf;
-using Prism.Commands;
+﻿using Prism.Commands;
 using Prism.Regions;
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,26 +11,31 @@ using Unclutter.Modules.ViewModels;
 using Unclutter.SDK;
 using Unclutter.SDK.Common;
 using Unclutter.SDK.Dialogs;
-using Unclutter.SDK.IModels;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Events;
+using Unclutter.SDK.Models;
+using Unclutter.SDK.Services;
 using Unclutter.SDK.Validation;
 using Unclutter.Services.Profiles;
 
 namespace Unclutter.ViewModels.ProfilesManagement
 {
-    public class ProfilesCreationViewModel : ValidationViewModelBase
+    public class ProfilesCreationViewModel : BaseValidationViewModel, IHandler<UserSelectedEvent>, IHandler<GameSelectedEvent>
     {
         /* Services */
         private readonly IProfilesManager _profilesManager;
         private readonly IDirectoryService _directoryService;
         private readonly IDialogProvider _dialogProvider;
+        private readonly IClientServices _clientServices;
+        private readonly ILocalizationProvider _localizationProvider;
         private readonly ILogger _logger;
+        private IRegionNavigationService _navigationService;
 
         /* Fields */
         private IUserDetails _selectedUser;
         private IGameDetails _selectedGame;
         private string _profileName;
         private string _downloadsLocation;
+        private bool _isAuthenticationPopupOpen;
         private SynchronizedObservableCollection<IUserDetails> _users;
 
         /* Properties */
@@ -72,62 +75,55 @@ namespace Unclutter.ViewModels.ProfilesManagement
         public bool IsUserSelected => _selectedUser != null;
         public bool IsGameSelected => _selectedGame != null;
 
+        public bool IsAuthenticationPopupOpen
+        {
+            get => _isAuthenticationPopupOpen;
+            set => SetProperty(ref _isAuthenticationPopupOpen, value);
+        }
+
+        public HandlerOptions HandlerOptions => new HandlerOptions();
+
         /* Commands */
-        public DelegateCommand<string> BrowseUrlCommand => new DelegateCommand<string>(BrowseUrl);
+        public DelegateCommand OpenAuthenticationPopupCommand => new DelegateCommand(OpenAuthenticationPopup);
         public DelegateCommand BrowseFolderCommand => new DelegateCommand(BrowseFolder);
         public DelegateCommand CreateProfileCommand => new AsyncDelegateCommand(CreateProfile, CanCreateProfile)
             .ObservesProperty(() => ProfileName)
             .ObservesProperty(() => DownloadsLocation)
             .ObservesProperty(() => IsUserSelected)
+            .ObservesProperty(() => HasErrors)
             .ObservesProperty(() => IsGameSelected);
 
         /* Constructor */
-        public ProfilesCreationViewModel(IProfilesManager profilesManager, IDirectoryService directoryService, ILoggerProvider loggerProvider, IDialogProvider dialogProvider)
+        public ProfilesCreationViewModel(IProfilesManager profilesManager,
+            IDirectoryService directoryService,
+            ILogger logger,
+            IDialogProvider dialogProvider,
+            IClientServices clientServices,
+            ILocalizationProvider localizationProvider)
         {
             _profilesManager = profilesManager;
             _directoryService = directoryService;
             _dialogProvider = dialogProvider;
-            _logger = loggerProvider.GetInstance();
+            _clientServices = clientServices;
+            _localizationProvider = localizationProvider;
+            _logger = logger;
 
             Users = new SynchronizedObservableCollection<IUserDetails>();
-
-            EventAggregator.GetEvent<GameSelectedEvent>().Subscribe(g =>
-            {
-                SelectedGame = g;
-                RaisePropertyChanged(nameof(IsGameSelected));
-            });
-            EventAggregator.GetEvent<UserSelectedEvent>().Subscribe(u =>
-            {
-                var existingUser = Users.FirstOrDefault(x => x.Id == u.Id);
-                if (existingUser != null)
-                {
-                    Users.Remove(existingUser);
-                }
-                Users.Add(u);
-                SelectedUser = u;
-                RaisePropertyChanged(nameof(IsUserSelected));
-            });
         }
 
         /* Methods */
-        public void BrowseUrl(string url)
+        private void OpenAuthenticationPopup()
         {
-            var psi = new ProcessStartInfo { UseShellExecute = true, FileName = url };
-            Process.Start(psi);
+            IsAuthenticationPopupOpen = !IsAuthenticationPopupOpen;
         }
 
         public void BrowseFolder()
         {
-            var browseDlg = new VistaFolderBrowserDialog
-            {
-                Description = LocalizationProvider.GetLocalizedString(ResourceKeys.DFolder_Msg_Select),
-                ShowNewFolderButton = true,
-                UseDescriptionForTitle = true
-            };
+            var selectedPath = _clientServices.OpenFolderSelectionDialog(_localizationProvider.GetLocalizedString(ResourceKeys.DFolder_Msg_Select));
 
-            if (browseDlg.ShowDialog().GetValueOrDefault() && Directory.Exists(browseDlg.SelectedPath))
+            if (!string.IsNullOrWhiteSpace(selectedPath) && Directory.Exists(selectedPath))
             {
-                DownloadsLocation = browseDlg.SelectedPath;
+                DownloadsLocation = selectedPath;
             }
         }
 
@@ -149,12 +145,12 @@ namespace Unclutter.ViewModels.ProfilesManagement
             catch (Exception ex)
             {
 
-                var msg = string.Format(LocalizationProvider.GetLocalizedString(ResourceKeys.Folder_Msg_Creation_Error), DownloadsLocation);
+                var msg = LocalizationProvider.GetLocalizedString(ResourceKeys.Folder_Msg_Creation_Error, DownloadsLocation);
 
                 _logger.Error(ex, msg);
 
                 await _dialogProvider.Message(LocalizationProvider.GetLocalizedString(ResourceKeys.Error), msg)
-                    .Icon(DialogIcon.Error)
+                    .Icon(IconType.Error)
                     .LeftButton(LocalizationProvider.GetLocalizedString(ResourceKeys.OK))
                     .Create()
                     .ShowDialogAsync();
@@ -163,28 +159,48 @@ namespace Unclutter.ViewModels.ProfilesManagement
 
             _profilesManager.Create(ProfileName, DownloadsLocation, SelectedGame, SelectedUser);
 
-            EventAggregator.GetEvent<ProfileCreatedEvent>().Publish();
-            Navigate();
+            _navigationService?.Journal.GoBack();
+
+            EventAggregator.PublishOnUIThread(new ProfileCreatedEvent());
         }
 
-        public override void Navigate(string uri = "")
+        public override Task OnViewLoaded()
         {
-            KeepAlive = false;
-            RegionManager.RequestNavigate(LocalIdentifiers.Regions.ProfilesManagement, LocalIdentifiers.Views.Profiles);
+            RegionManager.RequestNavigate(LocalIdentifiers.Regions.Games, LocalIdentifiers.Views.GamesSelection);
+            RegionManager.RequestNavigate(LocalIdentifiers.Regions.Authentication, LocalIdentifiers.Views.Authentication);
+            return Task.CompletedTask;
+
         }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            RegionManager.RequestNavigate(LocalIdentifiers.Regions.Games, LocalIdentifiers.Views.GamesSelection);
-            RegionManager.RequestNavigate(LocalIdentifiers.Regions.Authentication, LocalIdentifiers.Views.Authentication);
-            Task.Run(Populate);
-        }
-
-        /* Helpers */
-        private void Populate()
-        {
             Users.Clear();
             Users.AddRange(_profilesManager.EnumerateUsers());
+            _navigationService = navigationContext.NavigationService;
+        }
+
+        public override void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+            KeepAlive = false;
+        }
+
+        public void Handle(UserSelectedEvent @event)
+        {
+            var u = @event.UserDetails;
+            var existingUser = Users.FirstOrDefault(x => x.Id == u.Id);
+            if (existingUser != null)
+            {
+                Users.Remove(existingUser);
+            }
+            Users.Add(u);
+            SelectedUser = u;
+            RaisePropertyChanged(nameof(IsUserSelected));
+        }
+
+        public void Handle(GameSelectedEvent @event)
+        {
+            SelectedGame = @event.GameDetails;
+            RaisePropertyChanged(nameof(IsGameSelected));
         }
     }
 }

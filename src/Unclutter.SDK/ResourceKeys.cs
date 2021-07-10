@@ -2,6 +2,9 @@
 {
     public class ResourceKeys
     {
+        public const string DefaultAssemblyName = Constants.Unclutter;
+        public const string DefaultDictionaryName = "Strings";
+
         public const string App_Startup_Error = nameof(App_Startup_Error);
         public const string API_Key_Msg_Invalid_Error = nameof(API_Key_Msg_Invalid_Error);
         public const string API_Key_Msg_Validating_Error = nameof(API_Key_Msg_Validating_Error);
@@ -14,6 +17,7 @@
         public const string DFolder_Location_Hint = nameof(DFolder_Location_Hint);
         public const string Folder_Msg_Creation_Error = nameof(Folder_Msg_Creation_Error);
         public const string Games_Loading = nameof(Games_Loading);
+        public const string Games_Preparing = nameof(Games_Preparing);
         public const string Games_TextBox_Search_Hint = nameof(Games_TextBox_Search_Hint);
         public const string Get_API_Key = nameof(Get_API_Key);
         public const string Get_Started = nameof(Get_Started);
@@ -34,14 +38,21 @@
         public const string Server_Connection_Error_Internal = nameof(Server_Connection_Error_Internal);
         public const string Unclutter_Startup = nameof(Unclutter_Startup);
         public const string Account_Select_Hint = nameof(Account_Select_Hint);
+        public const string Account_Add = nameof(Account_Add);
+        public const string Plugins = nameof(Plugins);
+        public const string Notifications = nameof(Notifications);
+        public const string Tasks = nameof(Tasks);
         public const string AuthMethod1 = nameof(AuthMethod1);
         public const string AuthMethod2 = nameof(AuthMethod2);
         public const string Authorize = nameof(Authorize);
+        public const string Delete = nameof(Delete);
         public const string Back = nameof(Back);
+        public const string Select = nameof(Select);
         public const string Browse = nameof(Browse);
         public const string Cancel = nameof(Cancel);
         public const string Account = nameof(Account);
         public const string Close = nameof(Close);
+        public const string CloseAll = nameof(CloseAll);
         public const string Game = nameof(Game);
         public const string Connecting = nameof(Connecting);
         public const string Email = nameof(Email);
@@ -51,12 +62,15 @@
         public const string Loading = nameof(Loading);
         public const string Logs = nameof(Logs);
         public const string No = nameof(No);
-        public const string Notifications = nameof(Notifications);
         public const string OK = nameof(OK);
         public const string Premium = nameof(Premium);
         public const string Profiles = nameof(Profiles);
         public const string Profile = nameof(Profile);
         public const string Settings = nameof(Settings);
+        public const string Reload = nameof(Reload);
+        public const string Restore = nameof(Restore);
+        public const string RestoreDefaultSettings = nameof(RestoreDefaultSettings);
+
         public const string Unclutter = nameof(Unclutter);
         public const string User = nameof(User);
         public const string Yes = nameof(Yes);

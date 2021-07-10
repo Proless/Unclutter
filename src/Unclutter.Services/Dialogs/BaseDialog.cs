@@ -1,40 +1,43 @@
 ﻿using MaterialDesignThemes.Wpf;
 using Prism.Commands;
+using Prism.Mvvm;
 using System;
-using System.Linq;
-using System.Reflection;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using Unclutter.Modules.ViewModels;
+using Unclutter.SDK.Common;
 using Unclutter.SDK.Dialogs;
+using Unclutter.SDK.Images;
 
 namespace Unclutter.Services.Dialogs
 {
-    public abstract class BaseDialog : ViewModelBase
+    public abstract class BaseDialog : BindableBase
     {
         protected DialogSession DialogSession;
 
         /* Fields */
-        private string _text;
+        private string _message;
         private bool _canClose;
         private bool _isOptionChecked;
-        private object _icon;
+        private ImageReference _icon;
         private string _optionLabel;
+        private string _title;
 
         /* Commands */
         public DelegateCommand<DialogAction?> ActionClickedCommand => new DelegateCommand<DialogAction?>(OnActionClicked);
 
         /* Properties */
-        public bool IsDialogOpen { get; protected set; }
+        public bool IsDialogOpen { get; private set; }
         public Action<BaseDialog, DialogAction> OnClicked { get; protected set; }
-        public DialogIcon IconType { get; internal set; }
-        public string Text
+        public IconType IconType { get; internal set; }
+        public string Message
         {
-            get => _text;
-            set => SetProperty(ref _text, value);
+            get => _message;
+            set => SetProperty(ref _message, value);
         }
-        public object Icon
+        public string Title
+        {
+            get => _title;
+            set => SetProperty(ref _title, value);
+        }
+        public ImageReference Icon
         {
             get => _icon;
             internal set => SetProperty(ref _icon, value);
@@ -60,7 +63,7 @@ namespace Unclutter.Services.Dialogs
         {
             IsDialogOpen = false;
             CanClose = true;
-            IconType = DialogIcon.Custom;
+            IconType = IconType.Custom;
         }
 
         /* Methods */
@@ -79,13 +82,15 @@ namespace Unclutter.Services.Dialogs
 
         protected virtual void InternalClose(bool forceClose = false)
         {
+            if (!IsDialogOpen) return;
+
             try
             {
                 if (forceClose)
                 {
                     CanClose = true;
                 }
-                DialogSession?.Close();
+                UIDispatcher.OnUIThread(DialogSession.Close);
             }
             catch (InvalidOperationException)
             {
@@ -114,56 +119,28 @@ namespace Unclutter.Services.Dialogs
 
         protected virtual void SetIcon()
         {
-            if (IconType != DialogIcon.Custom)
+            if (IconType == IconType.Custom) return;
+
+            var iconFileName = GetIconFileName();
+            if (iconFileName == string.Empty)
             {
-                var resourceName = GetIconResourceName();
-                if (resourceName == string.Empty)
-                {
-                    return;
-                }
-
-                var assembly = Assembly.GetExecutingAssembly();
-
-                var imageName = assembly
-                    .GetManifestResourceNames()
-                    .Single(r => r.EndsWith(resourceName));
-
-                var icon = assembly.GetManifestResourceStream(imageName);
-
-                var imgSource = new BitmapImage();
-                imgSource.BeginInit();
-                imgSource.StreamSource = icon;
-                imgSource.CacheOption = BitmapCacheOption.OnLoad;
-                imgSource.EndInit();
-                imgSource.Freeze();
-
-                Icon = new Image
-                {
-                    Source = imgSource
-                };
-
-                RenderOptions.SetBitmapScalingMode((Image)Icon, BitmapScalingMode.HighQuality);
-                RenderOptions.SetEdgeMode((Image)Icon, EdgeMode.Aliased);
+                return;
             }
+
+            Icon = new ResourceImageReference($"Resources/{iconFileName}");
         }
 
-        private string GetIconResourceName()
+        private string GetIconFileName()
         {
-            switch (IconType)
+            return IconType switch
             {
-                case DialogIcon.Information:
-                    return "information.png";
-                case DialogIcon.Question:
-                    return "question.png";
-                case DialogIcon.Warning:
-                    return "warning.png";
-                case DialogIcon.Error:
-                    return "error.png";
-                case DialogIcon.Task:
-                    return "task.png";
-                default:
-                    return string.Empty;
-            }
+                IconType.Information => "information.png",
+                IconType.Question => "question.png",
+                IconType.Warning => "warning.png",
+                IconType.Error => "error.png",
+                IconType.Task => "task.png",
+                _ => string.Empty
+            };
         }
     }
 }

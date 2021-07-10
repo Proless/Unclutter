@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.Composition.Hosting;
-using Unclutter.SDK.Loader;
+﻿using System;
+using System.ComponentModel.Composition.Hosting;
 
 namespace Unclutter.SDK.Plugins
 {
-    public interface IPluginProvider : ILoader
+    public interface IPluginProvider
     {
         CompositionContainer Container { get; }
-        void ImportPlugins(IPluginConsumer consumer);
+        void ImportPlugins(IPluginConsumer consumer, Action onImported = null);
     }
 }

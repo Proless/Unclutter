@@ -1,16 +1,14 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
+using Unclutter.SDK.Common;
 
 namespace Unclutter.SDK.Plugins
 {
-    public interface IStartupAction
+    public interface IStartupAction : IDisplayItem, IOrderedObject
     {
-        string Label { get; }
-        string IconRef { get; }
-        string Hint { get; }
-        double Priority { get; }
         ICommand Action { get; }
+        void Initialize();
     }
 
     [MetadataAttribute, AttributeUsage(AttributeTargets.Class)]

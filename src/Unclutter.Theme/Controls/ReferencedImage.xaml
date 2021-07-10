@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="Unclutter.Theme.Controls.ReferencedImage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid x:Name="Root">
+        <Image x:Name="ImageSourceHost"
+               Stretch="Uniform"
+               HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType=UserControl,Mode=FindAncestor}}"
+               VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType=UserControl,Mode=FindAncestor}}"
+               RenderOptions.BitmapScalingMode="HighQuality"
+               RenderOptions.EdgeMode="Aliased" />
+        <ContentControl x:Name="ImageObjectHost"
+                        HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType=UserControl,Mode=FindAncestor}}"
+                        VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType=UserControl,Mode=FindAncestor}}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center" />
+    </Grid>
+</UserControl>

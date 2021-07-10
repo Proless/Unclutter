@@ -1,77 +1,115 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Unclutter.Modules.Helpers;
 using Unclutter.Modules.Plugins;
+using Unclutter.Modules.Plugins.AppWindowCommand;
+using Unclutter.Modules.Plugins.AppWindowFlyout;
 using Unclutter.Modules.ViewModels;
 using Unclutter.SDK;
-using Unclutter.SDK.Common;
+using Unclutter.SDK.App;
 using Unclutter.SDK.Events;
-using Unclutter.SDK.IModels;
-using Unclutter.SDK.Loader;
+using Unclutter.SDK.Models;
 using Unclutter.SDK.Plugins;
-using Unclutter.Services.Localization;
+using Unclutter.SDK.Services;
 
 namespace Unclutter.ViewModels
 {
-    public class ShellViewModel : ViewModelBase, ILoader, IPluginConsumer, IHandler<ProfileChangedEvent>
+    public class ShellViewModel : BaseViewModel, IPluginConsumer, IAppWindowServices, IHandler<ProfileLoadedEvent>
     {
         /* Fields */
-        private SynchronizedObservableCollection<IShellCommandAction> _shellCommandActions;
+        private SynchronizedObservableCollection<IAppWindowCommand> _appWindowCommands;
+        private SynchronizedObservableCollection<IAppWindowFlyout> _appWindowFlyouts;
         private IUserProfile _selectedProfile;
 
         /* Properties */
         [ImportMany]
-        public SynchronizedObservableCollection<IShellCommandAction> ShellCommandActions
+        public SynchronizedObservableCollection<IAppWindowCommand> AppWindowCommands
         {
-            get => _shellCommandActions;
-            set => SetProperty(ref _shellCommandActions, value);
+            get => _appWindowCommands;
+            set => SetProperty(ref _appWindowCommands, value);
+        }
+        [ImportMany]
+        public SynchronizedObservableCollection<IAppWindowFlyout> AppWindowFlyouts
+        {
+            get => _appWindowFlyouts;
+            set => SetProperty(ref _appWindowFlyouts, value);
         }
         public IUserProfile SelectedProfile
         {
             get => _selectedProfile;
             set => SetProperty(ref _selectedProfile, value);
         }
-        public ImportOptions Options => new ImportOptions() { ImportThread = ThreadOption.UIThread };
-        public bool AutoSubscribe => true;
+        public ImportOptions Options => new ImportOptions();
+        public HandlerOptions HandlerOptions => new HandlerOptions();
 
         /* Constructor */
         public ShellViewModel()
         {
+            AppWindowCommands = new SynchronizedObservableCollection<IAppWindowCommand>();
+            AppWindowFlyouts = new SynchronizedObservableCollection<IAppWindowFlyout>();
         }
 
         /* Methods */
         public void OnImportsSatisfied()
         {
-            var shellCommands = _shellCommandActions.ToArray();
-            foreach (var shellCommand in shellCommands)
+            var appWindowPlugins = new List<IAppWindowPlugin>();
+
+            appWindowPlugins.AddRange(_appWindowCommands);
+            appWindowPlugins.AddRange(_appWindowFlyouts);
+
+            foreach (var appWindowPlugin in appWindowPlugins)
             {
-                shellCommand.Initialize();
+                appWindowPlugin.Initialize();
             }
-            ShellCommandActions = new SynchronizedObservableCollection<IShellCommandAction>(shellCommands.OrderBy(a => a.Priority));
+
+            AppWindowCommands = new SynchronizedObservableCollection<IAppWindowCommand>(OrderHelper.GetOrderedDescending(appWindowPlugins.OfType<IAppWindowCommand>()));
+            AppWindowFlyouts = new SynchronizedObservableCollection<IAppWindowFlyout>(appWindowPlugins.OfType<IAppWindowFlyout>());
         }
-        public Task HandleAsync(ProfileChangedEvent @event, CancellationToken cancellationToken)
+        public void Handle(ProfileLoadedEvent @event)
         {
-            if (@event.NewProfile != SelectedProfile)
-            {
-                SelectedProfile = @event.NewProfile;
-                Title = $"{Constants.Unclutter} - {SelectedProfile.Name}";
-            }
-            return Task.CompletedTask;
+            SetProfile(@event.NewProfile);
         }
 
-        #region ILoader
-        public event Action<ProgressReport> ProgressChanged;
-        public LoadOptions LoaderOptions => new LoadOptions();
-        public async Task Load()
+        /* Helpers */
+        private void SetProfile(IUserProfile profile)
         {
-            for (var i = 0; i < 100; i++)
+            if (profile == SelectedProfile) return;
+
+            SelectedProfile = profile;
+            Title = $"{Constants.Unclutter} - {SelectedProfile.Name}";
+        }
+
+        #region IAppWindowServices
+        public bool IsFlyoutOpen(string name)
+        {
+            var flyout = AppWindowFlyouts.FirstOrDefault(f => f.Name == name);
+            if (flyout != null)
             {
-                await Task.Delay(1);
-                ProgressChanged?.Invoke(new ProgressReport(string.Format(LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.Loading_Status), SelectedProfile?.Name), i));
+                return flyout.IsOpen;
             }
+
+            return false;
+        }
+        public void OpenFlyout(string name)
+        {
+            var flyout = AppWindowFlyouts.FirstOrDefault(f => f.Name == name);
+            if (flyout != null)
+            {
+                flyout.IsOpen = true;
+            }
+        }
+        public void CloseFlyout(string name)
+        {
+            var flyout = AppWindowFlyouts.FirstOrDefault(f => f.Name == name);
+            if (flyout != null)
+            {
+                flyout.IsOpen = false;
+            }
+        }
+        public void NavigateToAppView(AppView view)
+        {
+            // TODO:
         }
         #endregion
     }

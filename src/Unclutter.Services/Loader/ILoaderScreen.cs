@@ -1,12 +1,13 @@
 ﻿using System;
-using Unclutter.SDK.Common;
+using Unclutter.SDK.Images;
+using Unclutter.SDK.Progress;
 
 namespace Unclutter.Services.Loader
 {
     public interface ILoaderScreen
     {
         event EventHandler Closed;
-        public object Logo { get; set; }
+        public ImageReference Logo { get; set; }
         public string Title { get; set; }
         public string Subtitle { get; set; }
         public string Footer { get; set; }

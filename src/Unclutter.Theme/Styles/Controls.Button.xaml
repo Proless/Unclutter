@@ -13,13 +13,39 @@
                 Value="{StaticResource Brush.Area.InActive}" />
         <Setter Property="FontSize"
                 Value="12" />
-        <Setter Property="Width"
-                Value="80" />
+    </Style>
+
+    <Style x:Key="Style.Button.Link"
+           TargetType="{x:Type Button}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <TextBlock TextDecorations="Underline">
+                        <ContentPresenter />
+                    </TextBlock>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Foreground"
+                Value="{DynamicResource MaterialDesignBody}" />
+        <Setter Property="Cursor"
+                Value="Hand" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver"
+                     Value="true">
+                <Setter Property="Foreground"
+                        Value="{DynamicResource PrimaryHueMidBrush}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style x:Key="Style.Button.Flat"
            TargetType="Button"
            BasedOn="{StaticResource MaterialDesignFlatButton}">
+        <Setter Property="VerticalContentAlignment"
+                Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment"
+                Value="Stretch" />
     </Style>
 
 </ResourceDictionary>

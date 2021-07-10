@@ -13,6 +13,8 @@ namespace Unclutter.Services.Container
         object Resolve(Type type);
         object Resolve(Type type, string name);
 
+        void Register(Type type, Func<object> factory);
+
         bool IsRegistered(Type type);
         bool IsRegistered(Type type, string name);
     }

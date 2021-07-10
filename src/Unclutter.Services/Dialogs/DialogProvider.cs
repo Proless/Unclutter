@@ -1,33 +1,27 @@
 ﻿using Unclutter.SDK.Dialogs;
 using Unclutter.Services.Dialogs.Message;
-using Unclutter.Services.Dialogs.TaskDlg;
+using Unclutter.Services.Dialogs.Task;
 
 namespace Unclutter.Services.Dialogs
 {
     public class DialogProvider : IDialogProvider
     {
+        /* Methods */
         public IMessageDialogConfig Message(string title, string message)
         {
-            var dialog = new MessageDialog
-            {
-                Title = title,
-                Text = message
-            };
+            var config = new MessageDialogConfig();
 
-            var config = new MessageDialogConfig(dialog);
+            config.Title(title);
+            config.Message(message);
 
             return config;
         }
-
         public ITaskDialogConfig Task(string title, string message)
         {
-            var dialog = new TaskDialog
-            {
-                Title = title,
-                Text = message
-            };
+            var config = new TaskDialogConfig();
 
-            var config = new TaskDialogConfig(dialog);
+            config.Title(title);
+            config.Message(message);
 
             return config;
         }

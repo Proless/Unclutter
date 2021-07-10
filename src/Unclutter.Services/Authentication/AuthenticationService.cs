@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
@@ -8,8 +7,8 @@ using System.Threading.Tasks;
 using Unclutter.API;
 using Unclutter.API.Factory;
 using Unclutter.SDK.Common;
-using Unclutter.SDK.IModels;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Models;
+using Unclutter.SDK.Services;
 using Unclutter.Services.Profiles;
 
 namespace Unclutter.Services.Authentication
@@ -20,13 +19,15 @@ namespace Unclutter.Services.Authentication
         public const string NexusModsSSOServer = "wss://sso.nexusmods.com";
         private readonly IJsonService _jSONService;
         private readonly INexusClientFactory _clientFactory;
-        private readonly ILogger _log;
+        private readonly IClientServices _clientServices;
+        private readonly ILogger _logger;
 
-        public AuthenticationService(IJsonService jSONService, ILoggerProvider loggerProvider, INexusClientFactory clientFactory)
+        public AuthenticationService(IJsonService jSONService, ILogger logger, INexusClientFactory clientFactory, IClientServices clientServices)
         {
             _jSONService = jSONService;
             _clientFactory = clientFactory;
-            _log = loggerProvider.GetInstance();
+            _clientServices = clientServices;
+            _logger = logger;
         }
         public async Task<IUserDetails> RequestAPIKey(string applicationReference, CancellationToken cancellationToken)
         {
@@ -53,19 +54,19 @@ namespace Unclutter.Services.Authentication
             await socket.ReceiveAsync(responseBuffer, cancellationToken);
 
             // Store the connection_token.
-            responseData = _jSONService.Deserialize(Encoding.UTF8.GetString(responseBuffer), responseData);
+            responseData = _jSONService.Deserialize(Encoding.UTF8.GetString(responseBuffer).Trim('\0'), responseData);
 
             if (!responseData.success) throw new APIException(HttpStatusCode.ServiceUnavailable, responseData.error);
 
             // Open the browser to prompt the user to authorize the request via the nexus mods website (SSO Service).
-            OpenBrowser(@"https://www.nexusmods.com/sso?id=" + uuid + "&application=" + applicationReference);
+            _clientServices.OpenInDefaultApp(@"https://www.nexusmods.com/sso?id=" + uuid + "&application=" + applicationReference);
 
             // Receiving the API key.
             responseBuffer = new ArraySegment<byte>(new byte[512]);
             await socket.ReceiveAsync(responseBuffer, cancellationToken);
 
             // Store the API Key.
-            responseData = _jSONService.Deserialize(Encoding.UTF8.GetString(responseBuffer), responseData);
+            responseData = _jSONService.Deserialize(Encoding.UTF8.GetString(responseBuffer).Trim('\0'), responseData);
 
             if (!responseData.success) throw new APIException(HttpStatusCode.ServiceUnavailable, responseData.error);
 
@@ -90,22 +91,8 @@ namespace Unclutter.Services.Authentication
                 IsPremium = user.IsPremium,
                 IsSupporter = user.IsSupporter,
                 ProfileUri = user.ProfileAvatarUri,
-                Id = user.UserId
+                Id = (int)user.UserId
             };
-        }
-
-        /* Helpers */
-        private void OpenBrowser(string url)
-        {
-            var processContext = new ProcessStartInfo { UseShellExecute = true, FileName = url };
-            try
-            {
-                Process.Start(processContext);
-            }
-            catch (Exception ex)
-            {
-                _log.Error(ex, ex.Message);
-            }
         }
     }
 }

@@ -1,15 +1,12 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace Unclutter.SDK.Events
+﻿namespace Unclutter.SDK.Events
 {
     public interface IHandler
     {
-        bool AutoSubscribe { get; }
+        HandlerOptions HandlerOptions { get; }
     }
 
-    public interface IHandler<in TParam> : IHandler
+    public interface IHandler<in TEvent> : IHandler
     {
-        Task HandleAsync(TParam @event, CancellationToken cancellationToken);
+        void Handle(TEvent @event);
     }
 }

@@ -8,6 +8,7 @@ namespace Unclutter.Services.Dialogs.Message
     public class MessageDialog : BaseDialog, IMessageDialog
     {
         /* Fields */
+        private TaskCompletionSource _tcs;
         private string _leftButtonLabel;
         private string _midButtonLabel;
         private string _rightButtonLabel;
@@ -30,36 +31,94 @@ namespace Unclutter.Services.Dialogs.Message
         }
 
         /* Methods */
-        public Task ShowDialogAsync(Action<IMessageDialog, DialogAction> onClicked = null)
+        public System.Threading.Tasks.Task ShowDialogAsync(Action<IMessageDialog, DialogAction> onClicked = null)
         {
             if (IsDialogOpen)
             {
-                return Task.CompletedTask;
+                return System.Threading.Tasks.Task.CompletedTask;
             }
 
             OnClicked = (dialog, action) => onClicked?.Invoke(dialog as IMessageDialog, action);
-            var dlg = new MessageDialogView
-            {
-                DataContext = this
-            };
 
-            return DialogHost.Show(dlg, OnDialogOpened, OnDialogClosed);
+            return UIDispatcher.OnUIThreadAsync(() =>
+            {
+                var dlg = new MessageDialogView
+                {
+                    DataContext = this
+                };
+
+                _tcs = new TaskCompletionSource();
+
+                return DialogHost.Show(dlg, OnDialogOpened, OnDialogClosed);
+            });
         }
-
-        public Task ShowDialogAsync(string hostId, Action<IMessageDialog, DialogAction> onClicked = null)
+        public System.Threading.Tasks.Task ShowDialogAsync(string hostId, Action<IMessageDialog, DialogAction> onClicked = null)
         {
             if (IsDialogOpen)
             {
-                return Task.CompletedTask;
+                return System.Threading.Tasks.Task.CompletedTask;
             }
 
             OnClicked = (dialog, action) => onClicked?.Invoke(dialog as IMessageDialog, action);
-            var dlg = new MessageDialogView
-            {
-                DataContext = this
-            };
 
-            return DialogHost.Show(dlg, hostId, OnDialogOpened, OnDialogClosed);
+            return UIDispatcher.OnUIThreadAsync(() =>
+            {
+                var dlg = new MessageDialogView
+                {
+                    DataContext = this
+                };
+
+                _tcs = new TaskCompletionSource();
+
+                return DialogHost.Show(dlg, hostId, OnDialogOpened, OnDialogClosed);
+            });
+        }
+        public System.Threading.Tasks.Task ShowAsync(Action<IMessageDialog, DialogAction> onClicked = null)
+        {
+            if (IsDialogOpen)
+            {
+                return System.Threading.Tasks.Task.CompletedTask;
+            }
+
+            OnClicked = (dialog, action) => onClicked?.Invoke(dialog as IMessageDialog, action);
+
+            return UIDispatcher.BeginOnUIThread(() =>
+            {
+                var dlg = new MessageDialogView
+                {
+                    DataContext = this
+                };
+
+                _tcs = new TaskCompletionSource();
+
+                DialogHost.Show(dlg, OnDialogOpened, OnDialogClosed); // TODO: Fire and Forget!
+            }).ContinueWith(_ => _tcs.Task);
+        }
+        public System.Threading.Tasks.Task ShowAsync(string hostId, Action<IMessageDialog, DialogAction> onClicked = null)
+        {
+            if (IsDialogOpen)
+            {
+                return System.Threading.Tasks.Task.CompletedTask;
+            }
+
+            OnClicked = (dialog, action) => onClicked?.Invoke(dialog as IMessageDialog, action);
+
+            return UIDispatcher.BeginOnUIThread(() =>
+            {
+                var dlg = new MessageDialogView
+                {
+                    DataContext = this
+                };
+
+                _tcs = new TaskCompletionSource();
+
+                DialogHost.Show(dlg, hostId, OnDialogOpened, OnDialogClosed); // TODO: Fire and Forget!
+            }).ContinueWith(_ => _tcs.Task);
+        }
+        protected override void OnDialogOpened(object sender, DialogOpenedEventArgs args)
+        {
+            base.OnDialogOpened(sender, args);
+            _tcs.SetResult();
         }
     }
 }

@@ -4,20 +4,20 @@ using System.Text.Json.Serialization;
 
 namespace Unclutter.API.Converters
 {
-    public class ParentCategoryIdConverter : JsonConverter<long>
+    public class ParentCategoryIdConverter : JsonConverter<int>
     {
-        public override long Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var id = reader.TokenType switch
             {
-                JsonTokenType.Number => reader.GetInt64(),
-                _ => -1L
+                JsonTokenType.Number => reader.GetInt32(),
+                _ => -1
             };
 
             return id;
         }
 
-        public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
         {
             writer.WriteNumberValue(value);
         }

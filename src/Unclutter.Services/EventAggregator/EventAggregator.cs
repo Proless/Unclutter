@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Unclutter.SDK.Common;
 using Unclutter.SDK.Events;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Services;
 using Unclutter.SDK.Plugins;
 
 namespace Unclutter.Services.EventAggregator
@@ -15,7 +14,6 @@ namespace Unclutter.Services.EventAggregator
     {
         /* Fields */
         private readonly List<Handler> _handlers = new List<Handler>();
-        private readonly List<IEventSource> _eventSources = new List<IEventSource>();
 
         /* Properties */
         public ImportOptions Options => new ImportOptions();
@@ -38,42 +36,36 @@ namespace Unclutter.Services.EventAggregator
             }
         }
 
+        public void Subscribe(IHandler handler)
+        {
+            var options = handler.HandlerOptions ?? new HandlerOptions();
+            switch (options.AutoSubscribeThread)
+            {
+                case ThreadOption.UIThread:
+                    SubscribeOnUIThread(handler);
+                    break;
+                case ThreadOption.BackgroundThread:
+                    SubscribeOnBackgroundThread(handler);
+                    break;
+                default:
+                    SubscribeOnPublishedThread(handler);
+                    break;
+            }
+        }
+
         public void SubscribeOnPublishedThread(IHandler handler)
         {
-            SubscribeCore(handler, f => f());
+            SubscribeCore(handler, action => action());
         }
 
         public void SubscribeOnBackgroundThread(IHandler handler)
         {
-            SubscribeCore(handler, f => Task.Factory.StartNew(f, default, TaskCreationOptions.None, TaskScheduler.Default));
+            SubscribeCore(handler, action => Task.Factory.StartNew(action, default, TaskCreationOptions.None, TaskScheduler.Default));
         }
 
         public void SubscribeOnUIThread(IHandler handler)
         {
-            SubscribeCore(handler, f =>
-            {
-                var taskCompletionSource = new TaskCompletionSource<bool>();
-
-                UIDispatcher.BeginOnUIThread(async () =>
-                {
-                    try
-                    {
-                        await f();
-
-                        taskCompletionSource.SetResult(true);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        taskCompletionSource.SetCanceled();
-                    }
-                    catch (Exception ex)
-                    {
-                        taskCompletionSource.SetException(ex);
-                    }
-                });
-
-                return taskCompletionSource.Task;
-            });
+            SubscribeCore(handler, action => UIDispatcher.OnUIThread(action));
         }
 
         public void Unsubscribe(IHandler handler)
@@ -94,41 +86,19 @@ namespace Unclutter.Services.EventAggregator
             }
         }
 
-        public Task PublishOnCurrentThreadAsync(object @event, CancellationToken cancellationToken = default)
+        public void PublishOnCurrentThread(object @event)
         {
-            return PublishAsyncCore(@event.GetType(), @event, f => f(), cancellationToken);
+            PublishCore(@event.GetType(), @event, action => action());
         }
 
-        public Task PublishOnBackgroundThreadAsync(object @event, CancellationToken cancellationToken = default)
+        public void PublishOnBackgroundThread(object @event)
         {
-            return PublishAsyncCore(@event.GetType(), @event, f => Task.Factory.StartNew(f, default, TaskCreationOptions.None, TaskScheduler.Default), cancellationToken);
+            PublishCore(@event.GetType(), @event, action => Task.Factory.StartNew(action, default, TaskCreationOptions.None, TaskScheduler.Default));
         }
 
-        public Task PublishOnUIThreadAsync(object @event, CancellationToken cancellationToken = default)
+        public void PublishOnUIThread(object @event)
         {
-            return PublishAsyncCore(@event.GetType(), @event, f =>
-             {
-                 var taskCompletionSource = new TaskCompletionSource<bool>();
-
-                 UIDispatcher.BeginOnUIThread(async () =>
-                 {
-                     try
-                     {
-                         await f();
-                         taskCompletionSource.SetResult(true);
-                     }
-                     catch (OperationCanceledException)
-                     {
-                         taskCompletionSource.SetCanceled();
-                     }
-                     catch (Exception ex)
-                     {
-                         taskCompletionSource.SetException(ex);
-                     }
-                 });
-
-                 return taskCompletionSource.Task;
-             }, cancellationToken);
+            PublishCore(@event.GetType(), @event, action => UIDispatcher.OnUIThread(action));
         }
 
         public void OnImportsSatisfied()
@@ -146,19 +116,19 @@ namespace Unclutter.Services.EventAggregator
             switch (source.PublishThread)
             {
                 case ThreadOption.UIThread:
-                    PublishOnUIThreadAsync(@event);
+                    PublishOnUIThread(@event);
                     break;
                 case ThreadOption.BackgroundThread:
-                    PublishOnBackgroundThreadAsync(@event);
+                    PublishOnBackgroundThread(@event);
                     break;
                 default:
-                    PublishOnCurrentThreadAsync(@event);
+                    PublishOnCurrentThread(@event);
                     break;
             }
         }
 
         /* Core */
-        public void SubscribeCore(IHandler handler, Func<Func<Task>, Task> marshal)
+        public void SubscribeCore(IHandler handler, Action<Action> marshal)
         {
             if (handler == null)
             {
@@ -181,7 +151,7 @@ namespace Unclutter.Services.EventAggregator
             }
         }
 
-        public Task PublishAsyncCore(Type eventType, object @event, Func<Func<Task>, Task> marshal, CancellationToken cancellationToken = default)
+        public void PublishCore(Type eventType, object @event, Action<Action> marshal)
         {
             if (@event == null)
             {
@@ -200,22 +170,22 @@ namespace Unclutter.Services.EventAggregator
                 toNotify = _handlers.ToArray();
             }
 
-            return marshal(async () =>
+            marshal(() =>
             {
-                var tasks = toNotify.Select(h => h.Handle(eventType, @event, cancellationToken));
-
-                await Task.WhenAll(tasks);
+                foreach (var toNotifyHandler in toNotify)
+                {
+                    toNotifyHandler.Handle(eventType, @event);
+                }
 
                 var dead = toNotify.Where(h => h.IsDead).ToList();
 
-                if (dead.Any())
+                if (!dead.Any()) return;
+
+                lock (_handlers)
                 {
-                    lock (_handlers)
+                    foreach (var handler in dead)
                     {
-                        foreach (var handler in dead)
-                        {
-                            _handlers.Remove(handler);
-                        }
+                        _handlers.Remove(handler);
                     }
                 }
             });

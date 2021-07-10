@@ -7,7 +7,10 @@
 
 	<ItemGroup>
 		<None Remove="Resources\icon.ico" />
-		<None Remove="Resources\icon.png" />
+		<None Remove="Resources\loaderScreenBg.jpg" />
+		<None Remove="Resources\loaderScreenBgRotated.jpg" />
+		<None Remove="Resources\logo.ico" />
+		<None Remove="Resources\logo.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -16,15 +19,22 @@
 		<PackageReference Include="MaterialDesignThemes.MahApps" Version="0.1.6" />
 		<PackageReference Include="VirtualizingWrapPanel" Version="1.5.4" />
 		<PackageReference Include="System.Drawing.Common" Version="5.0.2" />
+		<PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Unclutter.SDK\Unclutter.SDK.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Resource Include="Resources\icon.ico" />
-		<Resource Include="Resources\icon.png" />
+		<Resource Include="Resources\logo.png" />
+		<Resource Include="Resources\loaderScreenBg.jpg" />
+		<Resource Include="Resources\loaderScreenBgRotated.jpg" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Page Update="Theme.Extended.xaml">
+	  <Page Update="Theme.MahApps.xaml">
 	    <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 	    <SubType>Designer</SubType>
 	  </Page>

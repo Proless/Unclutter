@@ -1,0 +1,125 @@
+﻿<UserControl x:Class="Unclutter.CoreExtensions.AppWindowFlyouts.Notifications.NotificationCenterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:material="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:notifications="clr-namespace:Unclutter.CoreExtensions.AppWindowFlyouts.Notifications"
+             xmlns:common="clr-namespace:Unclutter.SDK.Common;assembly=Unclutter.SDK"
+             xmlns:sdk="clr-namespace:Unclutter.SDK;assembly=Unclutter.SDK"
+             xmlns:message="clr-namespace:Unclutter.Services.Notifications.Message;assembly=Unclutter.Services"
+             xmlns:task="clr-namespace:Unclutter.Services.Notifications.Task;assembly=Unclutter.Services"
+             xmlns:lex="https://github.com/XAMLMarkupExtensions/WPFLocalizationExtension"
+             lex:ResxLocalizationProvider.DefaultDictionary="{x:Static sdk:ResourceKeys.DefaultDictionaryName}"
+             lex:ResxLocalizationProvider.DefaultAssembly="{x:Static sdk:ResourceKeys.DefaultAssemblyName}"
+             mc:Ignorable="d"
+             Width="400"
+             d:DataContext="{d:DesignInstance notifications:NotificationsCenter}">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="Item.Notification"
+                      DataType="message:MessageNotification">
+            <message:MessageNotificationControl />
+        </DataTemplate>
+
+        <DataTemplate x:Key="Item.Task"
+                      DataType="task:TaskNotification">
+            <task:TaskNotificationControl />
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <material:DialogHost  OverlayBackground="{DynamicResource Brush.Area.InActive}"
+                          CloseOnClickAway="False"
+                          Identifier="{x:Static common:CommonIdentifiers+Dialogs.NotificationsDialogHostId}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Button Grid.Row="0"
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Command="{Binding CloseAllCommand}"
+                    Content="{lex:Loc {x:Static sdk:ResourceKeys.CloseAll}}"
+                    Style="{DynamicResource Style.Button.Flat}" />
+
+            <mah:MetroTabControl Grid.Column="0"
+                                 Grid.Row="0"
+                                 Grid.RowSpan="2"
+                                 Grid.ColumnSpan="2"
+                                 SelectedIndex="{Binding SelectedNotificationTabIndex, Mode=TwoWay}"
+                                 TabStripPlacement="Top"
+                                 mah:HeaderedControlHelper.HeaderFontSize="20"
+                                 mah:TabControlHelper.Underlined="SelectedTabItem"
+                                 mah:TabControlHelper.UnderlinePlacement="Bottom">
+
+                <mah:MetroTabItem Header="{lex:Loc {x:Static sdk:ResourceKeys.Notifications}}">
+                    <ItemsControl HorizontalContentAlignment="Stretch"
+                                  ItemTemplate="{StaticResource Item.Notification}"
+                                  ItemsSource="{Binding Notifications}">
+                        <ItemsControl.Style>
+                            <Style TargetType="ItemsControl"
+                                   BasedOn="{StaticResource Style.ItemsControl.Virtualized.StackPanel.Vertical}">
+                                <Style.Triggers>
+                                    <Trigger Property="HasItems"
+                                             Value="False">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <material:PackIcon Kind="ForumOutline"
+                                                                       Height="64"
+                                                                       Width="64"
+                                                                       VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Center"
+                                                                       Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ItemsControl.Style>
+                    </ItemsControl>
+                </mah:MetroTabItem>
+
+                <mah:MetroTabItem Header="{lex:Loc {x:Static sdk:ResourceKeys.Tasks}}">
+                    <ItemsControl HorizontalContentAlignment="Stretch"
+                                  ItemTemplate="{StaticResource Item.Task}"
+                                  ItemsSource="{Binding Tasks}">
+                        <ItemsControl.Style>
+                            <Style TargetType="ItemsControl"
+                                   BasedOn="{StaticResource Style.ItemsControl.Virtualized.StackPanel.Vertical}">
+                                <Style.Triggers>
+                                    <Trigger Property="HasItems"
+                                             Value="False">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <material:PackIcon Kind="ProgressCheck"
+                                                                       Height="64"
+                                                                       Width="64"
+                                                                       VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Center"
+                                                                       Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ItemsControl.Style>
+                    </ItemsControl>
+                </mah:MetroTabItem>
+
+            </mah:MetroTabControl>
+        </Grid>
+    </material:DialogHost>
+</UserControl>

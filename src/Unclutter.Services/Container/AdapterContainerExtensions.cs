@@ -16,7 +16,7 @@ namespace Unclutter.Services.Container
             _containerExtension = containerExtension ?? throw new ArgumentNullException(nameof(containerExtension));
             _containerInfo = containerInfo ?? throw new ArgumentNullException(nameof(containerInfo));
 
-            // Not available to MEF Exports and Imports
+            // Not available to MEF Exports
             RegisterInstance(typeof(IContainerExtension), this);
             RegisterInstance(typeof(IContainerProvider), this);
             RegisterInstance(typeof(IContainerAdapter), this);
@@ -26,6 +26,10 @@ namespace Unclutter.Services.Container
         public event Action<RegisteredComponentEventArgs> ComponentRegistered;
         object IContainerAdapter.Resolve(Type type) => Resolve(type);
         object IContainerAdapter.Resolve(Type type, string name) => Resolve(type, name);
+        void IContainerAdapter.Register(Type type, Func<object> factory)
+        {
+            _containerExtension.Register(type, factory);
+        }
         protected virtual void OnComponentRegistered(Type type) => OnComponentRegistered(type, null);
         protected virtual void OnComponentRegistered(Type type, string name)
         {

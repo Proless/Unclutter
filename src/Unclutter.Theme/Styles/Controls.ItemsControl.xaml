@@ -1,25 +1,14 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/Unclutter.Theme;component/Base.xaml" />
         <ResourceDictionary Source="/Unclutter.Theme;component/Brush.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <Style x:Key="Style.ItemsControl.Virtualized"
+    <Style x:Key="Style.ItemsControl.Virtualized.StackPanel.Vertical"
            TargetType="{x:Type ItemsControl}">
-        <Setter Property="ScrollViewer.CanContentScroll"
-                Value="True" />
-        <Setter Property="VirtualizingPanel.ScrollUnit"
-                Value="Pixel" />
-        <Setter Property="VirtualizingStackPanel.IsVirtualizing"
-                Value="True" />
-        <Setter Property="VirtualizingStackPanel.IsVirtualizingWhenGrouping"
-                Value="True" />
-        <Setter Property="VirtualizingStackPanel.VirtualizationMode"
-                Value="Recycling" />
-        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
-                Value="Auto" />
         <Setter Property="ItemsPanel">
             <Setter.Value>
                 <ItemsPanelTemplate>
@@ -30,18 +19,140 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ItemsControl">
-                    <Border Padding="{TemplateBinding Control.Padding}"
-                            Background="{TemplateBinding Panel.Background}"
-                            BorderBrush="{TemplateBinding Border.BorderBrush}"
-                            BorderThickness="{TemplateBinding Border.BorderThickness}"
-                            SnapsToDevicePixels="True">
-                        <ScrollViewer Padding="{TemplateBinding Control.Padding}"
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ScrollViewer Padding="{TemplateBinding Padding}"
+                                      CanContentScroll="True"
                                       Focusable="False">
-                            <ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                            <ItemsPresenter />
                         </ScrollViewer>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Setter Property="VirtualizingStackPanel.Orientation"
+                Value="Vertical" />
+        <Setter Property="VirtualizingStackPanel.ScrollUnit"
+                Value="Pixel" />
+        <Setter Property="VirtualizingStackPanel.IsVirtualizing"
+                Value="True" />
+        <Setter Property="VirtualizingStackPanel.IsVirtualizingWhenGrouping"
+                Value="True" />
+        <Setter Property="VirtualizingStackPanel.VirtualizationMode"
+                Value="Recycling" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                Value="Auto" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+                Value="Disabled" />
     </Style>
+
+    <Style x:Key="Style.ItemsControl.Virtualized.StackPanel.Horizontal"
+           TargetType="{x:Type ItemsControl}">
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ItemsControl">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ScrollViewer Padding="{TemplateBinding Padding}"
+                                      CanContentScroll="True"
+                                      Focusable="False">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="VirtualizingStackPanel.Orientation"
+                Value="Horizontal" />
+        <Setter Property="VirtualizingStackPanel.ScrollUnit"
+                Value="Pixel" />
+        <Setter Property="VirtualizingStackPanel.IsVirtualizing"
+                Value="True" />
+        <Setter Property="VirtualizingStackPanel.IsVirtualizingWhenGrouping"
+                Value="True" />
+        <Setter Property="VirtualizingStackPanel.VirtualizationMode"
+                Value="Recycling" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                Value="Disabled" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+                Value="Auto" />
+    </Style>
+
+    <Style x:Key="Style.ItemsControl.Virtualized.WrapPanel.Horizontal"
+           TargetType="{x:Type ItemsControl}">
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <vwp:VirtualizingWrapPanel Orientation="Horizontal"
+                                               ScrollUnit="Pixel"
+                                               IsVirtualizing="True"
+                                               IsVirtualizingWhenGrouping="True"
+                                               VirtualizationMode="Recycling" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ItemsControl">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ScrollViewer Padding="{TemplateBinding Padding}"
+                                      CanContentScroll="True"
+                                      Focusable="False">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                Value="Auto" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+                Value="Disabled" />
+    </Style>
+
+    <Style x:Key="Style.ItemsControl.Virtualized.WrapPanel.Vertical"
+           TargetType="{x:Type ItemsControl}">
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <vwp:VirtualizingWrapPanel Orientation="Vertical"
+                                               ScrollUnit="Pixel"
+                                               IsVirtualizing="True"
+                                               IsVirtualizingWhenGrouping="True"
+                                               VirtualizationMode="Recycling" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ItemsControl">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ScrollViewer Padding="{TemplateBinding Padding}"
+                                      CanContentScroll="True"
+                                      Focusable="False">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                Value="Disabled" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
+                Value="Auto" />
+    </Style>
+
 </ResourceDictionary>

@@ -5,7 +5,7 @@ using System.Data.Common;
 using System.Data.SQLite;
 using System.IO;
 using Unclutter.SDK.Data;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Services;
 using Unclutter.Services.Converters;
 
 namespace Unclutter.Services.Data
@@ -58,10 +58,12 @@ namespace Unclutter.Services.Data
             {
                 DataSource = dbFile,
                 ForeignKeys = true,
-                Version = 3,
+                Pooling = true,
+                JournalMode = SQLiteJournalModeEnum.Wal,
                 DateTimeFormat = SQLiteDateFormats.UnixEpoch,
+                DefaultIsolationLevel = IsolationLevel.Serializable,
                 Flags = SQLiteConnectionFlags.Default | SQLiteConnectionFlags.AllowNestedTransactions,
-                DefaultIsolationLevel = IsolationLevel.Serializable
+                Version = 3
             };
 
             return connectionStringBuilder.ToString();
@@ -69,7 +71,7 @@ namespace Unclutter.Services.Data
 
         private string GetDatabaseFile(string name)
         {
-            return Path.Combine(_directoryService.DataDirectory, $"{name}.db3");
+            return Path.Combine(_directoryService.DataDirectory, $"{name}.db");
         }
     }
 }

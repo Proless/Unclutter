@@ -2,11 +2,11 @@
 using System.Globalization;
 using System.Linq;
 using Unclutter.SDK;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Services;
 using WPFLocalizeExtension.Engine;
 using WPFLocalizeExtension.Extensions;
 using WPFLocalizeExtension.Providers;
-using ILocalizationProvider = Unclutter.SDK.IServices.ILocalizationProvider;
+using ILocalizationProvider = Unclutter.SDK.Services.ILocalizationProvider;
 
 namespace Unclutter.Services.Localization
 {
@@ -19,8 +19,8 @@ namespace Unclutter.Services.Localization
         private bool _isInitialized;
 
         /* Properties */
-        public string DefaultDictionaryName => Constants.DefaultDictionaryName;
-        public string DefaultAssemblyName => Constants.DefaultAssemblyName;
+        public string DefaultDictionaryName => ResourceKeys.DefaultDictionaryName;
+        public string DefaultAssemblyName => ResourceKeys.DefaultAssemblyName;
         public LocalizeDictionary LocalizeDictionary => LocalizeDictionary.Instance;
         public ResxLocalizationProvider ResxLocalizationProvider => ResxLocalizationProvider.Instance;
 
@@ -37,9 +37,17 @@ namespace Unclutter.Services.Localization
         {
             return GetLocalizedValue<string>(key);
         }
+        public string GetLocalizedString(string key, params object[] @params)
+        {
+            return string.Format(GetLocalizedValue<string>(key), @params);
+        }
         public string GetLocalizedString(string key, string assemblyName, string dictionaryName)
         {
             return GetLocalizedValue<string>(key, assemblyName, dictionaryName);
+        }
+        public string GetLocalizedString(string key, string assemblyName, string dictionaryName, params object[] @params)
+        {
+            return string.Format(GetLocalizedValue<string>(key, assemblyName, dictionaryName), @params);
         }
         public void SetLanguage(Language language)
         {
@@ -52,7 +60,6 @@ namespace Unclutter.Services.Localization
                 _ => CultureInfo.InvariantCulture
             };
         }
-
         public void Configure()
         {
             if (_isInitialized) return;

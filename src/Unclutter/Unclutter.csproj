@@ -4,7 +4,8 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net5.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
-		<ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+		<ApplicationIcon>icon.ico</ApplicationIcon>
+		<Win32Resource />
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -19,14 +20,22 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Resource Include="Resources\icon.ico" />
-		<Resource Include="Resources\loaderScreenBg.jpg" />
-		<Resource Include="Resources\loaderScreenBgRotated.jpg" />
-		<Resource Include="Resources\logo.png" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="Initialization\LoaderScreen.xaml.cs">
+		<Compile Update="CoreExtensions\AppWindowFlyouts\Notifications\NotificationCenterView.xaml.cs">
+		  <SubType>Code</SubType>
+		</Compile>
+		<Compile Update="CoreExtensions\AppWindowCommands\Logs\LogsControl.xaml.cs">
+		  <SubType>Code</SubType>
+		</Compile>
+		<Compile Update="CoreExtensions\AppWindowCommands\Notifications\NotificationsControl.xaml.cs">
+		  <SubType>Code</SubType>
+		</Compile>
+		<Compile Update="CoreExtensions\AppWindowCommands\Settings\SettingsControl.xaml.cs">
+		  <SubType>Code</SubType>
+		</Compile>
+		<Compile Update="CoreExtensions\AppWindowCommands\Tasks\TasksControl.xaml.cs">
+		  <SubType>Code</SubType>
+		</Compile>
+		<Compile Update="CoreExtensions\LoaderScreen.xaml.cs">
 			<SubType>Code</SubType>
 		</Compile>
 		<Compile Update="Properties\Strings.Designer.cs">
@@ -37,14 +46,39 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Page Update="Initialization\LoaderScreen.xaml">
+		<Page Update="CoreExtensions\AppWindowFlyouts\Notifications\NotificationCenterView.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="CoreExtensions\AppWindowCommands\Logs\LogsControl.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="CoreExtensions\AppWindowCommands\Notifications\NotificationsControl.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="CoreExtensions\AppWindowCommands\Settings\SettingsControl.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="CoreExtensions\AppWindowCommands\Tasks\TasksControl.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		  <Generator>MSBuild:Compile</Generator>
+		</Page>
+		<Page Update="CoreExtensions\DialogHostWindow.xaml">
+		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+		  <SubType>Designer</SubType>
+		</Page>
+		<Page Update="CoreExtensions\LoaderScreen.xaml">
 			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 			<SubType>Designer</SubType>
 		</Page>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Initialization\ArgumentsHandlers\" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -52,6 +86,11 @@
 	    <Generator>PublicResXFileCodeGenerator</Generator>
 	    <LastGenOutput>Strings.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="CoreExtensions\ArgumentsHandlers\" />
+	  <Folder Include="CoreExtensions\EventSources\" />
 	</ItemGroup>
 
 </Project>

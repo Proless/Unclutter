@@ -6,5 +6,12 @@
         {
             public const string Startup = "CommonIdentifiers.Regions.Startup";
         }
+
+        public class Dialogs
+        {
+            public const string StartupDialogHostId = "CommonIdentifiers.Dialogs.Hosts.StartupDialogHostId";
+            public const string NotificationsDialogHostId = "CommonIdentifiers.Dialogs.Hosts.NotificationsDialogHostId";
+            public const string MainDialogHostId = "CommonIdentifiers.Dialogs.Hosts.MainDialogHostId";
+        }
     }
 }

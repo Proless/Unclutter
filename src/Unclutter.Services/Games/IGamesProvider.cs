@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Unclutter.SDK.Data;
-using Unclutter.SDK.IModels;
+using Unclutter.SDK.Models;
 
 namespace Unclutter.Services.Games
 {

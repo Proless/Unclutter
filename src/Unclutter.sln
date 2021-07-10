@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter", "Unclutter\Uncl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.Theme", "Unclutter.Theme\Unclutter.Theme.csproj", "{281111DB-4C51-40E4-8DDF-5B5AB4F884CF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{300C1FF5-B3B0-4C14-80C3-D3782137FE15}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.SDK", "Unclutter.SDK\Unclutter.SDK.csproj", "{7341E48F-A21E-4841-BB7A-911AA46F6D7C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.Services", "Unclutter.Services\Unclutter.Services.csproj", "{3862741D-4D28-45FD-9341-3297FB71D4D6}"
@@ -22,9 +20,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\.config\dotnet-tools.json = ..\.config\dotnet-tools.json
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Modules.DownloadsManager", "Modules.DownloadsManager\Modules.DownloadsManager.csproj", "{494FFE35-9208-43BC-BC80-5CBB2B0E74E5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unclutter.API", "Unclutter.API\Unclutter.API.csproj", "{2FE67E28-91C7-462D-9FD6-04B52D7CCC4A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{3EC79AAC-A547-42F7-812E-5B196596D499}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unclutter.DownloadEngine", "Unclutter.DownloadEngine\Unclutter.DownloadEngine.csproj", "{8E6F1D35-8E57-402E-B988-6AF874E55562}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unclutter.Downloads", "Unclutter.Downloads\Unclutter.Downloads.csproj", "{D7CB7FAE-6E68-41A1-B0AF-13824F9553CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,23 +54,28 @@ Global
 		{FA9AA9B8-E83C-47DB-B18D-777A052EECAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA9AA9B8-E83C-47DB-B18D-777A052EECAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA9AA9B8-E83C-47DB-B18D-777A052EECAB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{494FFE35-9208-43BC-BC80-5CBB2B0E74E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{494FFE35-9208-43BC-BC80-5CBB2B0E74E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{494FFE35-9208-43BC-BC80-5CBB2B0E74E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{494FFE35-9208-43BC-BC80-5CBB2B0E74E5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2FE67E28-91C7-462D-9FD6-04B52D7CCC4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2FE67E28-91C7-462D-9FD6-04B52D7CCC4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FE67E28-91C7-462D-9FD6-04B52D7CCC4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2FE67E28-91C7-462D-9FD6-04B52D7CCC4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E6F1D35-8E57-402E-B988-6AF874E55562}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E6F1D35-8E57-402E-B988-6AF874E55562}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E6F1D35-8E57-402E-B988-6AF874E55562}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E6F1D35-8E57-402E-B988-6AF874E55562}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7CB7FAE-6E68-41A1-B0AF-13824F9553CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7CB7FAE-6E68-41A1-B0AF-13824F9553CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7CB7FAE-6E68-41A1-B0AF-13824F9553CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7CB7FAE-6E68-41A1-B0AF-13824F9553CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{494FFE35-9208-43BC-BC80-5CBB2B0E74E5} = {300C1FF5-B3B0-4C14-80C3-D3782137FE15}
+		{8E6F1D35-8E57-402E-B988-6AF874E55562} = {3EC79AAC-A547-42F7-812E-5B196596D499}
+		{D7CB7FAE-6E68-41A1-B0AF-13824F9553CE} = {3EC79AAC-A547-42F7-812E-5B196596D499}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		RESX_SaveFilesImmediatelyUponChange = False
 		SolutionGuid = {7B862E43-26B7-4AF3-B96D-5F2186724B9F}
+		RESX_SaveFilesImmediatelyUponChange = False
 	EndGlobalSection
 EndGlobal

@@ -12,7 +12,7 @@
         {
             _requiredAttribute = new System.ComponentModel.DataAnnotations.RequiredAttribute();
         }
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             return _requiredAttribute.Equals(obj);
         }
@@ -32,7 +32,7 @@
         {
             return _requiredAttribute.IsValid(value);
         }
-        public override bool Match(object? obj)
+        public override bool Match(object obj)
         {
             return _requiredAttribute.Match(obj);
         }

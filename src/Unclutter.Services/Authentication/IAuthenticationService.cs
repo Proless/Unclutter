@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Unclutter.SDK.IModels;
+using Unclutter.SDK.Models;
 
 namespace Unclutter.Services.Authentication
 {

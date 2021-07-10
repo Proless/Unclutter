@@ -2,30 +2,33 @@
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
-using Unclutter.SDK.Common;
+using Unclutter.SDK.Progress;
 
 namespace Unclutter.Services.Loader
 {
     public class LoaderScreenManager
     {
-        public static LoaderScreenManager Create<T>(Action<ILoaderScreen> setDefaultsAction = null) where T : Window, ILoaderScreen, new()
+        public static LoaderScreenManager Create<T>(Action<ILoaderScreen> configure = null) where T : Window, ILoaderScreen, new()
         {
-            return new LoaderScreenManager(() => new T(), setDefaultsAction);
+            return new LoaderScreenManager(() => new T(), configure);
         }
 
         /* Fields */
+        private bool _isClosed;
         private readonly Func<ILoaderScreen> _screenFactoryMethod;
-        private readonly Action<ILoaderScreen> _setDefault;
+        private readonly Action<ILoaderScreen> _configure;
         private Thread _loaderThread;
         private ManualResetEvent _initializedEvent;
         private ILoaderScreen _loaderScreen;
-        private bool _isClosed;
+
+        /* Properties */
+        public Window ScreenWindow => _loaderScreen as Window;
 
         /* Constructor */
-        private LoaderScreenManager(Func<ILoaderScreen> screenFactoryMethod, Action<ILoaderScreen> setDefault)
+        private LoaderScreenManager(Func<ILoaderScreen> screenFactoryMethod, Action<ILoaderScreen> configure)
         {
             _screenFactoryMethod = screenFactoryMethod ?? throw new ArgumentNullException(nameof(screenFactoryMethod));
-            _setDefault = setDefault;
+            _configure = configure;
             SetupBackgroundThread();
         }
 
@@ -41,7 +44,7 @@ namespace Unclutter.Services.Loader
             }
             else
             {
-                _loaderScreen.Show();
+                _loaderScreen?.Show();
             }
         }
 
@@ -49,18 +52,19 @@ namespace Unclutter.Services.Loader
         {
             if (_isClosed) return;
 
-            _loaderScreen.Hide();
+            _loaderScreen?.Hide();
         }
 
         public void Close()
         {
             _initializedEvent.Dispose();
-            _loaderScreen.Close();
+            _loaderScreen?.Close();
+            _loaderScreen = null;
         }
 
         public void ReportProgress(string message)
         {
-            ReportProgress(new ProgressReport(message, 0d));
+            ReportProgress(new ProgressReport(message));
         }
 
         public void ReportProgress(ProgressReport report)
@@ -80,7 +84,7 @@ namespace Unclutter.Services.Loader
 
                 _loaderScreen = _screenFactoryMethod();
 
-                _setDefault?.Invoke(_loaderScreen);
+                _configure?.Invoke(_loaderScreen);
 
                 _loaderScreen.Closed += (_, _) =>
                 {
@@ -88,7 +92,7 @@ namespace Unclutter.Services.Loader
                     Dispatcher.CurrentDispatcher.BeginInvokeShutdown(DispatcherPriority.Background);
                 };
 
-                _loaderScreen.Show();
+                _loaderScreen?.Show();
 
                 _initializedEvent.Set();
 

@@ -1,51 +1,180 @@
 ﻿<UserControl x:Class="Unclutter.Views.ProfilesManagement.ProfilesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:material="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:helpers="clr-namespace:Unclutter.Modules.Helpers;assembly=Unclutter.Modules"
+             xmlns:plugins="clr-namespace:Unclutter.SDK.Plugins;assembly=Unclutter.SDK"
+             xmlns:sdk="clr-namespace:Unclutter.SDK;assembly=Unclutter.SDK"
+             xmlns:profiles="clr-namespace:Unclutter.Services.Profiles;assembly=Unclutter.Services"
+             xmlns:controls="clr-namespace:Unclutter.Theme.Controls;assembly=Unclutter.Theme"
              xmlns:profilesManagement="clr-namespace:Unclutter.ViewModels.ProfilesManagement"
              xmlns:lex="https://github.com/XAMLMarkupExtensions/WPFLocalizationExtension"
-             xmlns:sdk="clr-namespace:Unclutter.SDK;assembly=Unclutter.SDK"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance profilesManagement:ProfilesViewModel}">
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../../Template.xaml" />
-            </ResourceDictionary.MergedDictionaries>
 
-            <helpers:BindingProxy x:Key="BindingProxy"
-                                  Data="{Binding}" />
+            <DataTemplate x:Key="Item.ProfileDetail"
+                          DataType="plugins:ProfileDetail">
+                <Grid ToolTip="{Binding Hint}"
+                      Margin="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <controls:ReferencedImage Grid.Column="0"
+                                              Margin="1"
+                                              VerticalAlignment="Center"
+                                              ImageReference="{Binding Icon}"
+                                              ImageHeight="16"
+                                              ImageWidth="16" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Detail}"
+                               VerticalAlignment="Center"
+                               FontSize="14"
+                               FontWeight="Light"
+                               Margin="2 1" />
+                </Grid>
+            </DataTemplate>
 
-            <ContextMenu x:Key="ContextMenu.Item.Profile"
-                         DataContext="{Binding Data, Source={StaticResource BindingProxy}}">
-                <MenuItem Header="Delete"
-                          Icon="{materialDesign:PackIcon Kind=TrashCan}"
-                          Command="{Binding DataContext.DeleteProfileCommand, RelativeSource={RelativeSource AncestorType=ContextMenu, Mode=FindAncestor}}"
-                          CommandParameter="{Binding PlacementTarget.Content, RelativeSource={RelativeSource AncestorType=ContextMenu, Mode=FindAncestor}}" />
-            </ContextMenu>
+            <DataTemplate x:Key="Item.Profile"
+                          DataType="profiles:UserProfile">
+                <material:Card>
+                    <material:Card.Style>
+                        <Style TargetType="{x:Type material:Card}">
+                            <Setter Property="Margin"
+                                    Value="4 2" />
+                            <Setter Property="Padding"
+                                    Value="2" />
+                            <Setter Property="Height"
+                                    Value="140" />
+                            <Setter Property="Background"
+                                    Value="{DynamicResource Brush.Area.InActive}" />
+                        </Style>
+                    </material:Card.Style>
+
+                    <!-- Content -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <controls:ReferencedImage Grid.Row="0"
+                                                  Grid.Column="0"
+                                                  Margin="0 2 8 0"
+                                                  ImageReference="{Binding Game.Image}" />
+
+                        <Grid Grid.Row="0"
+                              Grid.Column="1"
+                              VerticalAlignment="Center">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Grid.Row="0"
+                                       FontSize="18"
+                                       Margin="0 0 0 4"
+                                       Text="{Binding Name}"
+                                       Foreground="{DynamicResource MaterialDesignBody}" />
+
+                            <TextBlock Grid.Column="0"
+                                       Grid.Row="1"
+                                       FontSize="14"
+                                       Foreground="{StaticResource Brush.Foreground.InActive}"
+                                       Text="{Binding Game.Name}" />
+
+                            <TextBlock Grid.Column="0"
+                                       Grid.Row="2"
+                                       FontSize="14"
+                                       Foreground="{StaticResource Brush.Foreground.InActive}"
+                                       Text="{Binding DownloadsDirectory}"
+                                       TextTrimming="CharacterEllipsis"
+                                       ToolTip="{Binding DownloadsDirectory}" />
+
+                            <!-- Details -->
+                            <ItemsControl Grid.Column="0"
+                                          Grid.Row="3"
+                                          Margin="0 4"
+                                          ItemsSource="{Binding Details}"
+                                          ItemTemplate="{StaticResource Item.ProfileDetail}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel IsItemsHost="True"
+                                                   Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+
+                            <!-- Actions -->
+                            <StackPanel Grid.Column="1"
+                                        Grid.Row="3"
+                                        Margin="4 0"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Right">
+                                <Button Style="{DynamicResource MaterialDesignIconButton}"
+                                        ToolTip="{lex:Loc {x:Static sdk:ResourceKeys.Delete}}"
+                                        CommandParameter="{Binding}"
+                                        Command="{Binding DataContext.DeleteProfileCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}}">
+                                    <material:PackIcon Kind="DeleteForever"
+                                                       FlowDirection="{lex:Loc {x:Static sdk:ResourceKeys.FlowDirection}}" />
+                                </Button>
+                                <Button Style="{DynamicResource MaterialDesignIconButton}"
+                                        ToolTip="{lex:Loc {x:Static sdk:ResourceKeys.Select}}"
+                                        CommandParameter="{Binding}"
+                                        Command="{Binding DataContext.LoadProfileCommand, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}}">
+                                    <material:PackIcon Kind="Play"
+                                                       FlowDirection="{lex:Loc {x:Static sdk:ResourceKeys.FlowDirection}}" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </material:Card>
+            </DataTemplate>
+
         </ResourceDictionary>
     </UserControl.Resources>
 
     <ItemsControl HorizontalContentAlignment="Stretch"
+                  Margin="4 2"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
                   ItemTemplate="{StaticResource Item.Profile}"
                   ItemsSource="{Binding Profiles}">
         <ItemsControl.Style>
             <Style TargetType="ItemsControl"
-                   BasedOn="{StaticResource Style.ItemsControl.Virtualized}">
+                   BasedOn="{StaticResource Style.ItemsControl.Virtualized.StackPanel.Vertical}">
                 <Style.Triggers>
                     <Trigger Property="HasItems"
                              Value="False">
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate>
-                                    <TextBlock FontSize="23"
-                                               VerticalAlignment="Center"
-                                               HorizontalAlignment="Center"
-                                               Text="{lex:Loc {x:Static sdk:ResourceKeys.Profile_Get_Started}}" />
+                                    <StackPanel Orientation="Vertical"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center">
+                                        <material:PackIcon Kind="AccountGroupOutline"
+                                                           Height="64"
+                                                           Width="64"
+                                                           VerticalAlignment="Center"
+                                                           HorizontalAlignment="Center"
+                                                           Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                        <TextBlock FontSize="23"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   Text="{lex:Loc {x:Static sdk:ResourceKeys.Profile_Get_Started}}" />
+                                    </StackPanel>
                                 </ControlTemplate>
                             </Setter.Value>
                         </Setter>
@@ -53,13 +182,6 @@
                 </Style.Triggers>
             </Style>
         </ItemsControl.Style>
-
-        <ItemsControl.ItemContainerStyle>
-            <Style>
-                <Setter Property="Control.ContextMenu"
-                        Value="{StaticResource ContextMenu.Item.Profile}" />
-            </Style>
-        </ItemsControl.ItemContainerStyle>
     </ItemsControl>
 
 </UserControl>

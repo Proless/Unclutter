@@ -8,10 +8,9 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using Unclutter.SDK.IModels;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Images;
+using Unclutter.SDK.Models;
+using Unclutter.SDK.Services;
 
 namespace Unclutter.Services.Images
 {
@@ -35,32 +34,19 @@ namespace Unclutter.Services.Images
         }
 
         /* Methods */
-        public ImageSource GetImageFrom(string file, int height, int width)
+        public ImageReference GetImageFrom(string file, int width, int height)
         {
-            var source = new BitmapImage();
-
-            if (file is null || !File.Exists(file))
+            if (file == null)
             {
-                source.Freeze();
-                return source;
+                return ImageReference.Default;
             }
 
-            source.BeginInit();
-            source.UriSource = new Uri(file);
-            source.DecodePixelHeight = height;
-            source.DecodePixelWidth = width;
-            source.CacheOption = BitmapCacheOption.OnLoad;
-            source.EndInit();
-            source.Freeze();
-            return source;
+            return new SizedImageReference(new FileImageReference(file), new Size(width, height));
         }
 
-        public Task<ImageSource> DownloadImageFor(IGameDetails game, CancellationToken cancellationToken = default)
+        public Task<ImageReference> DownloadImageFor(IGameDetails game, CancellationToken cancellationToken = default)
         {
-            ImageSource imageSource = new BitmapImage();
-            imageSource.Freeze();
-
-            if (game is null) return Task.FromResult(imageSource);
+            if (game is null) return Task.FromResult(ImageReference.Default);
 
             var uri = $"https://staticdelivery.nexusmods.com/Images/games/4_3/tile_{game.Id}.jpg";
             var imageFile = GetImageFileFor(game);
@@ -75,12 +61,9 @@ namespace Unclutter.Services.Images
             }, cancellationToken);
         }
 
-        public Task<ImageSource> DownloadImageFor(IUserDetails user, CancellationToken cancellationToken = default)
+        public Task<ImageReference> DownloadImageFor(IUserDetails user, CancellationToken cancellationToken = default)
         {
-            ImageSource imageSource = new BitmapImage();
-            imageSource.Freeze();
-
-            if (user is null) return Task.FromResult(imageSource);
+            if (user is null) return Task.FromResult(ImageReference.Default);
 
             var uri = user.ProfileUri;
             var imageFile = GetImageFileFor(user);
@@ -95,30 +78,20 @@ namespace Unclutter.Services.Images
             }, cancellationToken);
         }
 
-        public ImageSource GetImageFor(IGameDetails game)
+        public ImageReference GetImageFor(IGameDetails game)
         {
             var imageFile = GetImageFileFor(game);
             if (!File.Exists(imageFile))
             {
                 ExtractImage(game);
             }
-            return GetImageFrom(imageFile, 255, 180);
+            return GetImageFrom(imageFile, 180, 255);
         }
 
-        public ImageSource GetImageFor(IUserDetails user)
+        public ImageReference GetImageFor(IUserDetails user)
         {
             var imageFile = GetImageFileFor(user);
-            return GetImageFrom(File.Exists(imageFile) ? imageFile : null, 191, 200);
-        }
-
-        public void Dispose()
-        {
-            try
-            {
-                _downloadClient?.Dispose();
-            }
-            catch (ObjectDisposedException)
-            { }
+            return GetImageFrom(File.Exists(imageFile) ? imageFile : null, 200, 191);
         }
 
         /* Helpers */

@@ -1,27 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
-using System.Reflection;
-using System.Threading.Tasks;
+using System.ComponentModel.Composition.Primitives;
+using System.Linq;
 using Unclutter.SDK.Common;
-using Unclutter.SDK.IServices;
-using Unclutter.SDK.Loader;
 using Unclutter.SDK.Plugins;
+using Unclutter.SDK.Services;
 
 namespace Unclutter.Services.Plugins
 {
     /// <summary>
-    /// A simple plugins provider which uses VS MEF to discover and compose plugins in assemblies
+    /// A simple plugins provider which uses MEF to discover and compose plugins
     /// </summary>
     public class PluginProvider : IPluginProvider
     {
         /* Services */
+        private readonly ILogger _logger;
         private readonly IDirectoryService _directoryService;
         private readonly IContainerExportProvider _containerExportProvider;
-        private readonly ILogger _logger;
+        private bool _isInitialized;
 
         /* Fields */
-        private bool _initialized;
         private AggregateCatalog _catalog;
 
         /* Properties */
@@ -29,71 +29,100 @@ namespace Unclutter.Services.Plugins
         public ICompositionService CompositionService => Container;
 
         /* Constructor */
-        public PluginProvider(IDirectoryService directoryService, IContainerExportProvider containerExportProvider, ILoggerProvider loggerProvider)
+        public PluginProvider(
+            ILogger logger,
+            IDirectoryService directoryService,
+            IContainerExportProvider containerExportProvider)
         {
+            _logger = logger;
             _directoryService = directoryService;
             _containerExportProvider = containerExportProvider;
-            _logger = loggerProvider.GetInstance();
         }
 
         /* Methods */
-        public void ImportPlugins(IPluginConsumer consumer)
+        public void ImportPlugins(IPluginConsumer consumer, Action onImported = null)
         {
-            var config = consumer.Options ?? new ImportOptions();
-
-            if (!config.AutoImport) return;
-
             try
             {
-                switch (config.ImportThread)
-                {
-                    case ThreadOption.UIThread:
-                        UIDispatcher.OnUIThread(() => CompositionService.SatisfyImportsOnce(consumer));
-                        break;
-                    case ThreadOption.BackgroundThread:
-                        Task.Run(() => CompositionService.SatisfyImportsOnce(consumer));
-                        break;
-                }
+                CompositionService.SatisfyImportsOnce(consumer);
+                onImported?.Invoke();
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Importing plugins failed, PluginConsumer: {PluginConsumerType}", consumer.GetType().ToString());
+                _logger.Error(ex, "Importing plugins failed, PluginConsumer: {PluginConsumerType}", consumer.GetType().FullName);
             }
         }
 
-        protected async Task Initialize()
+        public void Initialize()
         {
-            if (_initialized) return;
+            if (_isInitialized) return;
 
-            await Task.Run(() =>
-           {
-               var pluginsCatalog = new AggregateDirectoryCatalog(_directoryService.ExtensionsDirectory);
+            var pluginsCatalog = new AggregateDirectoryCatalog(_directoryService.ExtensionsDirectory);
 
-               _catalog = new AggregateCatalog();
-               _catalog.Catalogs.Add(pluginsCatalog);
-               _catalog.Catalogs.Add(new AssemblyCatalog(Assembly.GetCallingAssembly()));
-               _catalog.Catalogs.Add(new AssemblyCatalog(Assembly.GetExecutingAssembly()));
-               _catalog.Catalogs.Add(new AssemblyCatalog(Assembly.GetEntryAssembly() ?? throw new InvalidOperationException("The entry assembly was null, this should not happen !")));
+            _catalog = new AggregateCatalog();
+            _catalog.Catalogs.Add(pluginsCatalog);
+            _catalog.Catalogs.Add(new ApplicationCatalog());
 
-               var exportProviders = new ExportProvider[]
-               {
-                   _containerExportProvider.ExportProvider
-               };
+            var exportProviders = new ExportProvider[]
+            {
+                _containerExportProvider.ExportProvider
+            };
 
-               Container = new CompositionContainer(_catalog, CompositionOptions.IsThreadSafe, exportProviders);
-           });
+            Container = new CompositionContainer(_catalog, CompositionOptions.IsThreadSafe, exportProviders);
 
-            _initialized = true;
+            RegisterExports();
+
+            _isInitialized = true;
         }
 
-        #region ILoader
-        public event Action<ProgressReport> ProgressChanged;
-        public LoadOptions LoaderOptions => new LoadOptions();
-        public Task Load()
+        /* Helpers */
+        private void RegisterExports()
         {
-            ProgressChanged?.Invoke(new ProgressReport("Loading plugins..."));
-            return Initialize();
+            var ignored = new List<string>();
+            var toRegister = new Dictionary<string, ExportDefinition>();
+            foreach (var partDefinition in _catalog)
+            {
+                foreach (var exportDefinition in partDefinition.ExportDefinitions)
+                {
+                    var id = exportDefinition.GetExportTypeIdentity();
+
+                    if (string.IsNullOrWhiteSpace(id) || ignored.Contains(id)) continue;
+
+                    if (toRegister.ContainsKey(id))
+                    {
+                        ignored.Add(id);
+                        toRegister.Remove(id);
+                    }
+                    else
+                    {
+                        toRegister.Add(id, exportDefinition);
+                    }
+                }
+            }
+
+            foreach (var (id, exportDefinition) in toRegister)
+            {
+                if (PluginServices.TryGetType(id, out var type))
+                {
+                    _containerExportProvider.RegisterExport(type, () => GetExportedValue(type, exportDefinition.ContractName));
+                }
+            }
+
         }
-        #endregion
+        private object GetExportedValue(Type type, string name)
+        {
+            var importDefinition = PluginServices.GetImportDefinition(type, name);
+
+            if (Container.TryGetExports(importDefinition, null, out var exports) && exports != null)
+            {
+                var matchingExports = exports.ToArray();
+                if (matchingExports.Any())
+                {
+                    return matchingExports.FirstOrDefault()?.Value;
+                }
+            }
+
+            return null;
+        }
     }
 }

@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="Unclutter.CoreExtensions.AppWindowCommands.Tasks.TasksControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:material="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:commonConverters="clr-namespace:Unclutter.Theme.Converters;assembly=Unclutter.Theme">
+
+    <UserControl.Resources>
+        <commonConverters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    </UserControl.Resources>
+
+    <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Center">
+        <Grid>
+            <Button Content="{material:PackIcon ProgressClock, Size=20}"
+                    Command="{Binding Command}"
+                    Cursor="Hand" />
+        </Grid>
+        <TextBlock Text="{Binding Count}"
+                   Visibility="{Binding Count, Converter={StaticResource NullToVisibilityConverter}}"
+                   VerticalAlignment="Center"
+                   Margin="4 0" />
+    </StackPanel>
+</UserControl>

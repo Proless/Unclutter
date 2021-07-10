@@ -1,64 +1,44 @@
-﻿using Prism.Commands;
-using Prism.Regions;
-using Prism.Services.Dialogs;
+﻿using Prism.Services.Dialogs;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
+using System.ComponentModel.Composition;
+using Unclutter.Modules.Helpers;
 using Unclutter.Modules.ViewModels;
 using Unclutter.SDK;
 using Unclutter.SDK.Common;
 using Unclutter.SDK.Events;
 using Unclutter.SDK.Plugins;
-using Unclutter.Services;
-using Unclutter.Services.Localization;
+using Unclutter.SDK.Services;
 
 namespace Unclutter.ViewModels.Dialogs
 {
-    public class StartupDialogViewModel : ViewModelBase, IDialogAware, IHandler<ProfileChangedEvent>
+    public class StartupDialogViewModel : BaseViewModel, IDialogAware, IPluginConsumer, IHandler<CloseStartupDialogEvent>
     {
         /* Fields */
-        private IStartupAction _currentStartupAction;
-        private IRegion _region;
-        private bool _canGoBack;
+        private SynchronizedObservableCollection<IStartupAction> _startupAction;
 
         /* Properties */
-        public override string Title { get; set; } = LocalizationProvider.Instance.GetLocalizedString(ResourceKeys.Unclutter_Startup);
-        public bool AutoSubscribe => true;
-        public IRegion Region
+        public override string Title => LocalizationProvider.GetLocalizedString(ResourceKeys.Unclutter_Startup);
+        public HandlerOptions HandlerOptions => new HandlerOptions { AutoSubscribeThread = ThreadOption.UIThread };
+        public ImportOptions Options => new ImportOptions();
+        [ImportMany]
+        public SynchronizedObservableCollection<IStartupAction> StartupActions
         {
-            get => _region;
-            set => SetProperty(ref _region, value);
+            get => _startupAction;
+            set => SetProperty(ref _startupAction, value);
         }
-        public bool CanGoBack
-        {
-            get => _canGoBack;
-            set => SetProperty(ref _canGoBack, value);
-        }
-        public IStartupAction CurrentStartupAction
-        {
-            get => _currentStartupAction;
-            set => SetProperty(ref _currentStartupAction, value);
-        }
-
-        /* Commands */
-        public DelegateCommand NavigateBackwardsCommand => new DelegateCommand(NavigateBackwards);
 
         /* Methods */
-        public void NavigateBackwards()
+        public void Handle(CloseStartupDialogEvent @event)
         {
-            Region.NavigationService.Journal.GoBack();
+            RequestClose?.Invoke(@event.Result);
         }
-
-        public Task HandleAsync(ProfileChangedEvent @event, CancellationToken cancellationToken)
+        public void OnImportsSatisfied()
         {
-            var result = ButtonResult.Cancel;
-
-            if (@event.NewProfile != null)
+            StartupActions = new SynchronizedObservableCollection<IStartupAction>(OrderHelper.GetOrdered(StartupActions));
+            foreach (var startupAction in StartupActions)
             {
-                result = ButtonResult.OK;
+                startupAction.Initialize();
             }
-
-            return UIDispatcher.OnUIThreadAsync(() => RequestClose?.Invoke(new DialogResult(result)));
         }
 
         #region IDialogAware
@@ -67,22 +47,13 @@ namespace Unclutter.ViewModels.Dialogs
         public void OnDialogClosed()
         {
             RegionManager.Regions.Remove(CommonIdentifiers.Regions.Startup);
-            RegionManager.Regions.Remove(LocalIdentifiers.Regions.ProfilesManagement);
-            RegionManager.Regions.Remove(LocalIdentifiers.Regions.StartupActions);
             RegionManager.Regions.Remove(LocalIdentifiers.Regions.Games);
             RegionManager.Regions.Remove(LocalIdentifiers.Regions.Authentication);
         }
         public void OnDialogOpened(IDialogParameters parameters)
         {
-            Region = RegionManager.Regions[CommonIdentifiers.Regions.Startup];
-            Region.NavigationService.Navigated += (_, _) =>
-            {
-                CanGoBack = Region.NavigationService.Journal.CanGoBack;
-            };
-
-            RegionManager.RequestNavigate(CommonIdentifiers.Regions.Startup, LocalIdentifiers.Views.Startup);
+            RegionManager.RequestNavigate(CommonIdentifiers.Regions.Startup, LocalIdentifiers.Views.Profiles);
         }
         #endregion
-
     }
 }

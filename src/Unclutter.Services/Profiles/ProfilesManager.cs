@@ -1,10 +1,13 @@
 ﻿using Dapper;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using System.Linq;
 using Unclutter.SDK.Data;
-using Unclutter.SDK.IModels;
-using Unclutter.SDK.IServices;
+using Unclutter.SDK.Models;
+using Unclutter.SDK.Plugins;
+using Unclutter.SDK.Services;
 using Unclutter.Services.Data;
 using Unclutter.Services.Games;
 using Unclutter.Services.Images;
@@ -15,8 +18,8 @@ namespace Unclutter.Services.Profiles
     {
         /* Services */
         private readonly IDatabaseProvider _dbProvider;
-        private readonly IGamesProvider _gamesProvider;
         private readonly IImageProvider _imageProvider;
+        private readonly IPluginProvider _pluginProvider;
 
         /* Properties */
         public string ProfilesDirectory { get; }
@@ -26,18 +29,20 @@ namespace Unclutter.Services.Profiles
         public event Action<ProfileChangedArgs> ProfileChanged;
 
         /* Constructors */
-        public ProfilesManager(ISqliteDatabaseFactory sqliteDatabaseFactory, IGamesProvider gamesProvider, IImageProvider imageProvider, IDirectoryService directoryService)
+        public ProfilesManager(
+            ISqliteDatabaseFactory sqliteDatabaseFactory,
+            IImageProvider imageProvider,
+            IDirectoryService directoryService,
+            IPluginProvider pluginProvider)
         {
             _dbProvider = sqliteDatabaseFactory.CreateOrGet(LocalIdentifiers.Database.App);
-            _gamesProvider = gamesProvider;
             _imageProvider = imageProvider;
+            _pluginProvider = pluginProvider;
 
             ProfilesDirectory = Path.Combine(directoryService.DataDirectory, "profiles");
             CurrentProfile = null;
 
             directoryService.EnsureDirectoryAccess(ProfilesDirectory);
-
-            Initialize();
         }
 
         /* Methods */
@@ -48,17 +53,23 @@ namespace Unclutter.Services.Profiles
 
         public IEnumerable<IUserDetails> EnumerateUsers()
         {
-            return _dbProvider.TransactionalSqlQuery<IEnumerable<IUserDetails>>((db, transaction) =>
+            return _dbProvider.TransactionalQuery((connection, transaction) =>
             {
+                var output = new List<IUserDetails>();
+
                 var selectUsers = "SELECT * FROM User";
 
-                var users = db.Query<UserDetails>(selectUsers, transaction: transaction).AsList();
+                var users = connection
+                    .Query<UserDetails>(selectUsers, transaction: transaction)
+                    .AsList();
+
                 foreach (var user in users)
                 {
-                    user.ImageSource = _imageProvider.GetImageFor(user);
+                    user.Image = _imageProvider.GetImageFor(user);
+                    output.Add(user);
                 }
 
-                return users;
+                return output;
             });
         }
 
@@ -66,23 +77,23 @@ namespace Unclutter.Services.Profiles
         {
             if (profiles is null) return;
 
-            _dbProvider.TransactionalSqlCommand((db, transaction) =>
+            _dbProvider.TransactionalExecuteLocked((connection, transaction) =>
             {
                 foreach (var profile in profiles)
                 {
-                    if (ReadById(profile.Id) is null)
+                    if (InternalRead(connection, transaction, profile.Id) is null)
                     {
-                        Insert(profile);
+                        InternalInsert(connection, transaction, profile);
                     }
                     else
                     {
-                        Update(profile);
+                        InternalUpdate(connection, transaction, profile);
                     }
                 }
             });
         }
 
-        public void ChangeProfile(IUserProfile profile)
+        public void LoadProfile(IUserProfile profile)
         {
             var args = new ProfileChangedArgs(profile, CurrentProfile);
             CurrentProfile = profile;
@@ -95,13 +106,17 @@ namespace Unclutter.Services.Profiles
             {
                 Name = name,
                 DownloadsDirectory = downloadsDirectory,
-                Game = game as GameDetails, // TODO: temporary workaround
-                User = user as UserDetails, // TODO: temporary workaround
+                Game = new GameDetails(game),
+                User = new UserDetails(user),
                 GameId = game.Id,
                 UserId = user.Id
             };
 
             Save(new[] { profile });
+
+            profile.Details = GetProfileDetails(profile);
+
+            Directory.CreateDirectory(Path.Combine(ProfilesDirectory, profile.Name));
 
             return profile;
         }
@@ -109,116 +124,198 @@ namespace Unclutter.Services.Profiles
         #region CRUD
         public IEnumerable<IUserProfile> ReadAll()
         {
-            return _dbProvider.TransactionalSqlQuery<IEnumerable<IUserProfile>>((db, transaction) =>
+            return _dbProvider.TransactionalQuery((connection, transaction) =>
             {
-                var selectProfiles = "SELECT * FROM Profile";
-                var selectUser = "SELECT * FROM User WHERE Id = @Id";
+                var cache = new Dictionary<int, UserProfile>();
 
-                var profiles = db.Query<UserProfile>(selectProfiles, transaction: transaction).AsList();
-                foreach (var profile in profiles)
+                var sql = @"SELECT * FROM Profile p INNER JOIN ""User"" u ON u.Id = p.UserId INNER JOIN Game g ON g.Id = p.GameId INNER JOIN GameCategory gc ON gc.GameId = g.Id";
+
+                connection.Query<UserProfile, UserDetails, GameDetails, GameCategory, UserProfile>(
+                        sql,
+                        (profile, user, game, category) => MapProfileProps(profile, user, game, category, cache),
+                        splitOn: "Id",
+                        transaction: transaction)
+                    .AsList();
+
+                foreach (var profile in cache.Values)
                 {
-                    var user = db.QueryFirstOrDefault<UserDetails>(selectUser, new { Id = profile.UserId }, transaction);
-                    user.ImageSource = _imageProvider.GetImageFor(user);
-                    var game = _gamesProvider.ReadById(profile.GameId);
-                    profile.User = user;
-                    profile.Game = game as GameDetails; // TODO: temporary workaround
+                    PopulateProfileDetails(profile);
                 }
 
-                return profiles;
+                return cache.Values;
             });
         }
-
-        public IUserProfile ReadById(long id)
+        public IUserProfile Read(long id)
         {
-            return _dbProvider.TransactionalSqlQuery<IUserProfile>((db, transaction) =>
-            {
-                var selectProfile = "SELECT * FROM Profile WHERE Id = @Id";
-                var selectUser = "SELECT * FROM User WHERE Id = @Id";
-                var profile = db.QueryFirstOrDefault<UserProfile>(selectProfile, new { Id = id }, transaction);
-
-                if (profile is null) return null;
-
-                var user = db.QueryFirstOrDefault<UserDetails>(selectUser, new { Id = profile.UserId }, transaction);
-                user.ImageSource = _imageProvider.GetImageFor(user);
-                var game = _gamesProvider.ReadById(profile.GameId);
-
-                profile.User = user;
-                profile.Game = game as GameDetails; // TODO: temporary workaround
-                return profile;
-
-            });
+            return _dbProvider.TransactionalQuery((connection, transaction)
+                => InternalRead(connection, transaction, id));
         }
-
         public IUserProfile Insert(IUserProfile entity)
         {
             if (entity is null) return null;
 
-            return _dbProvider.TransactionalSqlQuery<IUserProfile>((db, transaction) =>
+            UserProfile result = null;
+
+            _dbProvider.TransactionalExecuteLocked((connection, transaction) =>
             {
-                db.Execute(
-                    db.QueryFirstOrDefault<UserDetails>("SELECT * FROM User WHERE Id = @Id", new { entity.User.Id },
-                        transaction) is null
-                        ? SqliteScripts.Table.User.Insert
-                        : SqliteScripts.Table.User.Update, entity.User, transaction);
-
-                _gamesProvider.Save(new List<IGameDetails> { entity.Game });
-
-                db.Execute(SqliteScripts.Table.Profile.Insert, new { entity.Name, entity.DownloadsDirectory, UserId = entity.User.Id, GameId = entity.Game.Id }, transaction);
-                var id = db.QuerySingle<long>("SELECT last_insert_rowid()", transaction: transaction);
-                return new UserProfile
-                {
-                    Id = id,
-                    DownloadsDirectory = entity.DownloadsDirectory,
-                    Name = entity.Name,
-                    Game = entity.Game as GameDetails, // TODO: temporary workaround
-                    User = entity.User as UserDetails //  TODO: temporary workaround
-                };
+                result = InternalInsert(connection, transaction, entity);
             });
-        }
 
+            PopulateProfileDetails(result);
+
+            return result;
+        }
         public IUserProfile Update(IUserProfile entity)
         {
             if (entity is null) return null;
 
-            _dbProvider.TransactionalSqlCommand((db, transaction) =>
-            {
-                db.Execute(
-                    db.QueryFirstOrDefault<UserDetails>("SELECT * FROM User WHERE Id = @Id", new { entity.User.Id },
-                        transaction) is null
-                        ? SqliteScripts.Table.User.Insert
-                        : SqliteScripts.Table.User.Update, entity.User, transaction);
-
-                _gamesProvider.Save(new List<IGameDetails> { entity.Game });
-
-                db.Execute(SqliteScripts.Table.Profile.Update, new { entity.Name, entity.DownloadsDirectory, UserId = entity.User.Id, GameId = entity.Game.Id }, transaction);
-            });
+            _dbProvider.TransactionalExecute((connection, transaction)
+                => InternalUpdate(connection, transaction, entity));
 
             return entity;
         }
-
         public IUserProfile Delete(IUserProfile entity)
         {
             if (entity is null) return null;
 
-            _dbProvider.TransactionalSqlCommand((db, transaction) =>
-            {
-                db.Execute(SqliteScripts.Table.Profile.Delete, new { entity.Id }, transaction);
-            });
+            _dbProvider.TransactionalExecute((connection, transaction)
+                => InternalDelete(connection, transaction, entity));
 
             return entity;
         }
         #endregion
 
-        /* Helpers */
+        #region InternalCRUD
+        private UserProfile InternalRead(IDbConnection connection, IDbTransaction transaction, long id)
+        {
+            var cache = new Dictionary<int, UserProfile>();
+
+            var sql = @"SELECT * FROM Profile p INNER JOIN ""User"" u ON u.Id = p.UserId INNER JOIN Game g ON g.Id = p.GameId INNER JOIN GameCategory gc ON gc.GameId = g.Id WHERE p.Id = @Id";
+
+            connection.Query<UserProfile, UserDetails, GameDetails, GameCategory, UserProfile>(
+                     sql,
+                     (profile, user, game, category) => MapProfileProps(profile, user, game, category, cache),
+                     new { Id = id },
+                     splitOn: "Id",
+                     transaction: transaction)
+                 .AsList();
+
+            var result = cache.Values.FirstOrDefault();
+
+            PopulateProfileDetails(result);
+
+            return result;
+        }
+        private UserProfile InternalInsert(IDbConnection connection, IDbTransaction transaction, IUserProfile entity)
+        {
+            SaveUser(connection, transaction, entity.User);
+
+            SaveGame(connection, transaction, entity.Game);
+
+            connection.Execute(SqliteScripts.Table.Profile.Insert, new { entity.Name, entity.DownloadsDirectory, GameId = entity.Game.Id, UserId = entity.User.Id }, transaction);
+
+            var profileGeneratedId = connection.ExecuteScalar<long>("SELECT last_insert_rowid()");
+
+            return InternalRead(connection, transaction, profileGeneratedId);
+        }
+        private void InternalUpdate(IDbConnection connection, IDbTransaction transaction, IUserProfile entity)
+        {
+            SaveUser(connection, transaction, entity.User);
+
+            SaveGame(connection, transaction, entity.Game);
+
+            connection.Execute(SqliteScripts.Table.Profile.Update, new { entity.Id, entity.Name, entity.DownloadsDirectory, GameId = entity.Game.Id, UserId = entity.User.Id }, transaction);
+        }
+        private void InternalDelete(IDbConnection connection, IDbTransaction transaction, IUserProfile entity)
+        {
+            connection.Execute(SqliteScripts.Table.Profile.Delete, new { entity.Id }, transaction);
+        }
+        #endregion
+
+        #region Helpers
         private void Initialize()
         {
-            // Create database required tables
-            _dbProvider.TransactionalSqlCommand((db, transaction) =>
+            _dbProvider.TransactionalExecute((connection, transaction) =>
             {
                 // Order of Table creation is important.
-                db.Execute(SqliteScripts.Table.User.Create, transaction);
-                db.Execute(SqliteScripts.Table.Profile.Create, transaction);
+                connection.Execute(SqliteScripts.Table.User.Create, transaction: transaction);
+                connection.Execute(SqliteScripts.Table.Profile.Create, transaction: transaction);
             });
         }
+        private UserProfile MapProfileProps(UserProfile profile, UserDetails user, GameDetails game, GameCategory category, IDictionary<int, UserProfile> cache)
+        {
+            if (!cache.TryGetValue(profile.Id, out var profileEntry))
+            {
+                profileEntry = profile;
+                cache.Add(profileEntry.Id, profileEntry);
+
+                profileEntry.User = user;
+                profileEntry.Game = game;
+
+                profileEntry.Game.Categories = new List<GameCategory>();
+
+                profileEntry.User.Image = _imageProvider.GetImageFor(profileEntry.User);
+                profileEntry.Game.Image = _imageProvider.GetImageFor(profileEntry.Game);
+            }
+
+            profileEntry.Game.Categories.Add(category);
+
+            return profileEntry;
+        }
+        private void SaveUser(IDbConnection connection, IDbTransaction transaction, IUserDetails user)
+        {
+            connection.Execute(
+                connection.Query<UserDetails>("SELECT * FROM User u WHERE u.Id = @Id", new { user.Id },
+                    transaction).FirstOrDefault() is null
+                    ? SqliteScripts.Table.User.Insert
+                    : SqliteScripts.Table.User.Update, user, transaction);
+        }
+        private void SaveGame(IDbConnection connection, IDbTransaction transaction, IGameDetails game)
+        {
+            var selectGame = "SELECT * FROM Game WHERE Id = @Id";
+
+            connection.Execute(
+                connection.Query<GameDetails>(selectGame, new { game.Id }, transaction).Any()
+                    ? SqliteScripts.Table.Game.Update
+                    : SqliteScripts.Table.Game.Insert, game, transaction);
+
+            SaveCategories(connection, transaction, game);
+        }
+        private void SaveCategories(IDbConnection connection, IDbTransaction transaction, IGameDetails game)
+        {
+            // Delete categories 
+            connection.Execute("DELETE FROM GameCategory WHERE GameId = @GameId", new { GameId = game.Id }, transaction);
+
+            // Insert categories
+            foreach (var category in game.Categories)
+            {
+                connection.Execute(SqliteScripts.Table.GameCategory.Insert, new { category.Id, category.Name, category.ParentCategoryId, GameId = game.Id }, transaction);
+            }
+        }
+        private IEnumerable<ProfileDetail> GetProfileDetails(IUserProfile userProfile)
+        {
+            var details = new List<ProfileDetail>();
+
+            if (userProfile is null) return details;
+
+            var detailProviders = _pluginProvider.Container.GetExportedValues<IProfileDetailsProvider>();
+            foreach (var provider in detailProviders)
+            {
+                if (provider.PopulateDetails(userProfile))
+                {
+                    details.AddRange(provider.Details);
+                }
+            }
+
+            return details;
+        }
+        private void PopulateProfileDetails(UserProfile profile)
+        {
+            if (profile != null)
+            {
+                profile.Details = GetProfileDetails(profile);
+            }
+        }
+        #endregion
     }
 }

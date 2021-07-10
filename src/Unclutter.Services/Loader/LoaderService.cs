@@ -1,121 +1,136 @@
-﻿using Prism.Ioc;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using Unclutter.SDK.Common;
-using Unclutter.SDK.IServices;
-using Unclutter.SDK.Loader;
+using Unclutter.SDK.Services;
+using Unclutter.SDK.Plugins;
+using Unclutter.SDK.Progress;
 
 namespace Unclutter.Services.Loader
 {
     public class LoaderService : ILoaderService
     {
         /* Fields */
-        private readonly IContainerExtension _containerExtension;
         private readonly ILogger _logger;
-        private readonly Dictionary<ILoader, bool> _loaderFlags = new Dictionary<ILoader, bool>(); // memory leak
-        private readonly ConcurrentQueue<ILoader> _loadersQueue = new ConcurrentQueue<ILoader>();
+        private readonly IPluginProvider _pluginProvider;
+        private List<ILoader> _loaders = new List<ILoader>();
+        private readonly ConcurrentQueue<ILoader> _registeredLoaders = new ConcurrentQueue<ILoader>();
 
         /* Events */
-        public event Action<ProgressReport> ProgressChanged;
-        public event Action Finished;
+        public event Action<ProgressReport> LoadProgressed;
+        public event Action LoadFinished;
 
         /* Properties */
         public bool IsLoading { get; private set; }
+        public bool IsLoaded { get; private set; }
 
         /* Constructor */
-        public LoaderService(IContainerExtension containerExtension, ILoggerProvider loggerProvider)
+        public LoaderService(ILogger logger, IPluginProvider pluginProvider)
         {
-            _containerExtension = containerExtension;
-            _logger = loggerProvider.GetInstance();
+            _logger = logger;
+            _pluginProvider = pluginProvider;
         }
 
         /* Methods */
         public async Task Load()
         {
-            if (IsLoading) return;
+            if (IsLoading)
+            {
+                throw new InvalidOperationException("Can't call ILoaderService.Load() recursively !");
+            }
+
+            if (IsLoaded) return;
 
             IsLoading = true;
-
-            while (!_loadersQueue.IsEmpty)
+            foreach (var loader in _loaders)
             {
-                if (_loadersQueue.TryDequeue(out var loader))
+                await InternalPrepareLoad(loader);
+            }
+
+            while (!_registeredLoaders.IsEmpty)
+            {
+                if (_registeredLoaders.TryDequeue(out var loader))
                 {
-                    await InternalLoad(loader);
-                    loader.ProgressChanged -= OnLoaderProgressChanged;
+                    await InternalPrepareLoad(loader);
                 }
             }
 
-            _loaderFlags.Clear();
-
+            foreach (var loader in _registeredLoaders)
+            {
+                await InternalPrepareLoad(loader);
+            }
             IsLoading = false;
 
-            Finished?.Invoke();
+            _loaders = new List<ILoader>();
+
+            IsLoaded = true;
+
+            LoadFinished?.Invoke();
         }
 
         public async Task Load(ILoader loader)
         {
-            loader.ProgressChanged += OnLoaderProgressChanged;
-            await InternalLoad(loader);
-            loader.ProgressChanged -= OnLoaderProgressChanged;
+            await InternalPrepareLoad(loader);
         }
 
+        public void Initialize()
+        {
+            if (IsLoaded) return;
+
+            var loaders = _pluginProvider.Container.GetExportedValues<ILoader>().ToList();
+
+            _loaders = new List<ILoader>(OrderHelper.GetOrdered(loaders));
+        }
+
+        /// <summary>
+        /// This method will ignore the <see cref="ILoader.Order"/> value and queue the registered ILoader in a FIFO Queue
+        /// </summary>
+        /// <param name="loader">The ILoader instance to load after all other exported ILoaders have finished loading</param>
         public void RegisterLoader(ILoader loader)
         {
-            if (loader == null || _loaderFlags.ContainsKey(loader)) return;
-
-            loader.ProgressChanged += OnLoaderProgressChanged;
-            _loadersQueue.Enqueue(loader);
-            _loaderFlags.Add(loader, false);
-        }
-
-        public void RegisterLoader<T>() where T : ILoader
-        {
-            try
+            if (loader != null)
             {
-                var instance = _containerExtension.Resolve<T>();
-                RegisterLoader(instance);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Unable to register Loader of Type {LoaderType}.", typeof(T).FullName);
+                _registeredLoaders.Enqueue(loader);
             }
         }
 
         /* Helpers */
-        private async Task InternalLoad(ILoader loader)
+        private async Task InternalPrepareLoad(ILoader loader)
         {
-            // if Load method was already called on this ILoader instance, just return.
-            if (_loaderFlags.TryGetValue(loader, out var loaded) && loaded) return;
-
             try
             {
                 var options = loader.LoaderOptions ?? new LoadOptions();
                 if (options.AutoLoad)
                 {
-                    if (options.LoadThread == ThreadOption.BackgroundThread)
-                    {
-                        await Task.Run(loader.Load);
-                    }
-                    else
-                    {
-                        await Application.Current.Dispatcher.InvokeAsync(loader.Load);
-                    }
+                    await InternalLoad(loader, options.LoadThread);
                 }
-
-                _loaderFlags[loader] = true;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error occurred while loading {Loader}...", loader.GetType().FullName);
+                _logger.Error(ex, "Error encountered while loading {Loader}...", loader.GetType().FullName);
             }
+        }
+
+        private async Task InternalLoad(ILoader loader, ThreadOption thread)
+        {
+            loader.ProgressChanged += OnLoaderProgressChanged;
+            switch (thread)
+            {
+                case ThreadOption.BackgroundThread:
+                    await Task.Factory.StartNew(loader.Load, default, TaskCreationOptions.None, TaskScheduler.Default).Unwrap();
+                    break;
+                default:
+                    await UIDispatcher.OnUIThreadAsync(loader.Load);
+                    break;
+            }
+            loader.ProgressChanged -= OnLoaderProgressChanged;
         }
 
         private void OnLoaderProgressChanged(ProgressReport report)
         {
-            ProgressChanged?.Invoke(report);
+            LoadProgressed?.Invoke(report);
         }
     }
 }
